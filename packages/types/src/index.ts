@@ -1,4 +1,5 @@
 export * from "./api.js"
+export * from "./analytics.js" // kilocode_change - session analytics dashboard
 export * from "./auto-purge.js" // kilocode_change
 export * from "./context-config.js" // kilocode_change
 export * from "./cloud.js"
