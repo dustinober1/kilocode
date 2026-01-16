@@ -4,9 +4,11 @@ import { Tab, TabContent, TabHeader } from "../common/Tab"
 import { Button } from "@/components/ui"
 import { StatCard } from "./StatCard"
 import { DateRangePicker } from "./DateRangePicker"
+import { ExportAnalytics } from "./ExportAnalytics"
 import { CostOverTimeChart } from "./charts/CostOverTimeChart"
 import { TokenUsageChart } from "./charts/TokenUsageChart"
 import { ModeBreakdownChart } from "./charts/ModeBreakdownChart"
+import { CacheEfficiencyChart } from "./charts/CacheEfficiencyChart"
 import { useAnalyticsData } from "./hooks/useAnalyticsData"
 import BottomControls from "../kilocode/BottomControls"
 
@@ -38,6 +40,11 @@ export function AnalyticsView({ onDone }: AnalyticsViewProps) {
                         <Button onClick={onDone}>{t("analytics:done")}</Button>
                     </div>
                 </div>
+                {hasData && (
+                    <div className="flex justify-end">
+                        <ExportAnalytics summary={summary} />
+                    </div>
+                )}
             </TabHeader>
 
             <TabContent className="px-3 py-2 overflow-y-auto">
@@ -95,6 +102,14 @@ export function AnalyticsView({ onDone }: AnalyticsViewProps) {
                             <h4 className="text-vscode-foreground text-sm m-0">{t("analytics:usageByMode")}</h4>
                             <div className="bg-vscode-editor-background rounded-md border border-vscode-panel-border p-3">
                                 <ModeBreakdownChart data={summary.byMode} />
+                            </div>
+                        </div>
+
+                        {/* Cache Efficiency Chart */}
+                        <div className="flex flex-col gap-2">
+                            <h4 className="text-vscode-foreground text-sm m-0">{t("analytics:cacheEfficiency")}</h4>
+                            <div className="bg-vscode-editor-background rounded-md border border-vscode-panel-border p-3">
+                                <CacheEfficiencyChart data={summary.cacheEfficiency} />
                             </div>
                         </div>
 

@@ -120,7 +120,7 @@ describe("AnalyticsView", () => {
         expect(screen.getByText("25")).toBeInTheDocument()
         expect(screen.getByText("Tokens Used")).toBeInTheDocument()
         expect(screen.getByText("Cache Hit Rate")).toBeInTheDocument()
-        expect(screen.getByText("75%")).toBeInTheDocument()
+        expect(screen.getAllByText("75%").length).toBeGreaterThan(0)
     })
 
     it("should render all chart sections", () => {
