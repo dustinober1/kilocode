@@ -19,6 +19,7 @@ import ProfileView from "./components/kilocode/profile/ProfileView" // kilocode_
 import McpView from "./components/mcp/McpView" // kilocode_change
 import AuthView from "./components/kilocode/auth/AuthView" // kilocode_change
 import { MarketplaceView } from "./components/marketplace/MarketplaceView"
+import { AnalyticsView } from "./components/analytics" // kilocode_change: session analytics dashboard
 import BottomControls from "./components/kilocode/BottomControls" // kilocode_change
 import { MemoryService } from "./services/MemoryService" // kilocode_change
 import { HumanRelayDialog } from "./components/human-relay/HumanRelayDialog"
@@ -33,7 +34,7 @@ import { STANDARD_TOOLTIP_DELAY } from "./components/ui/standard-tooltip"
 import { useKiloIdentity } from "./utils/kilocode/useKiloIdentity"
 import { MemoryWarningBanner } from "./kilocode/MemoryWarningBanner"
 
-type Tab = "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "account" | "cloud" | "profile" | "auth" // kilocode_change: add "profile" and "auth"
+type Tab = "settings" | "history" | "mcp" | "modes" | "chat" | "marketplace" | "account" | "cloud" | "profile" | "auth" | "analytics" // kilocode_change: add "profile", "auth", and "analytics"
 
 interface HumanRelayDialogState {
 	isOpen: boolean
@@ -331,6 +332,8 @@ const App = () => {
 			{tab === "mcp" && <McpView onDone={() => switchTab("chat")} />}
 			{/* kilocode_change end */}
 			{tab === "history" && <HistoryView onDone={() => switchTab("chat")} />}
+			{/* kilocode_change: session analytics dashboard */}
+			{tab === "analytics" && <AnalyticsView onDone={() => switchTab("chat")} />}
 			{/* kilocode_change: auth redirect / editingProfile */}
 			{tab === "settings" && (
 				<SettingsView

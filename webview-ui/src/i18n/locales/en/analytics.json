@@ -1,0 +1,25 @@
+{
+    "title": "Analytics",
+    "done": "Done",
+    "noData": "No data available",
+    "noDataMessage": "Start using Kilo to see your usage analytics here.",
+    "totalCost": "Total Cost",
+    "sessions": "Sessions",
+    "tokensUsed": "Tokens Used",
+    "cacheHitRate": "Cache Hit Rate",
+    "costOverTime": "Cost Over Time",
+    "tokenUsage": "Token Usage",
+    "usageByMode": "Usage by Mode",
+    "avgCostPerSession": "Avg Cost / Session",
+    "avgTokensPerSession": "Avg Tokens / Session",
+    "cost": "Cost",
+    "tokensIn": "Tokens In",
+    "tokensOut": "Tokens Out",
+    "dateRange": {
+        "today": "Today",
+        "7days": "Last 7 Days",
+        "30days": "Last 30 Days",
+        "90days": "Last 90 Days",
+        "allTime": "All Time"
+    }
+}
