@@ -625,6 +625,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.25.2
         version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@pppp606/ink-chart':
+        specifier: 0.1.1
+        version: 0.1.1(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3))(react@19.2.3)
       '@qdrant/js-client-rest':
         specifier: ^1.16.2
         version: 1.16.2(typescript@5.9.3)
@@ -730,6 +733,9 @@ importers:
       ink-link:
         specifier: ^5.0.0
         version: 5.0.0(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3))
+      ink-table:
+        specifier: ^3.1.0
+        version: 3.1.0(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3))(react@19.2.3)
       inquirer:
         specifier: ^13.1.0
         version: 13.1.0(@types/node@25.0.3)
@@ -5394,6 +5400,7 @@ packages:
   '@lancedb/lancedb@0.21.3':
     resolution: {integrity: sha512-hfzp498BfcCJ730fV1YGGoXVxRgE+W1n0D0KwanKlbt8bBPSQ6E6Tf8mPXc8rKdAXIRR3o5mTzMG3z3Fda+m3Q==}
     engines: {node: '>= 18'}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
     peerDependencies:
       apache-arrow: '>=15.0.0 <=18.1.0'
@@ -6182,6 +6189,13 @@ packages:
 
   '@posthog/core@1.9.1':
     resolution: {integrity: sha512-kRb1ch2dhQjsAapZmu6V66551IF2LnCbc1rnrQqnR7ArooVyJN9KOPXre16AJ3ObJz2eTfuP7x25BMyS2Y5Exw==}
+
+  '@pppp606/ink-chart@0.1.1':
+    resolution: {integrity: sha512-iuJnx013aLBmhCER9GEC8/J+DtMnJWP68xbkGthHoN3vI7Lou6VEns64UvfxPZA+P33iADk0CDWnz4tRlX5Fww==}
+    hasBin: true
+    peerDependencies:
+      ink: '>=4'
+      react: '>=18'
 
   '@puppeteer/browsers@2.10.5':
     resolution: {integrity: sha512-eifa0o+i8dERnngJwKrfp3dEq7ia5XFyoqB17S4gK8GhsQE4/P8nxOfQSE0zQHxzzLo/cmF+7+ywEQ7wK7Fb+w==}
@@ -13916,6 +13930,12 @@ packages:
     peerDependencies:
       ink: '>=6'
 
+  ink-table@3.1.0:
+    resolution: {integrity: sha512-qxVb4DIaEaJryvF9uZGydnmP9Hkmas3DCKVpEcBYC0E4eJd3qNgNe+PZKuzgCERFe9LfAS1TNWxCr9+AU4v3YA==}
+    peerDependencies:
+      ink: '>=3.0.0'
+      react: '>=16.8.0'
+
   ink-testing-library@4.0.0:
     resolution: {integrity: sha512-yF92kj3pmBvk7oKbSq5vEALO//o7Z9Ck/OaLNlkzXNeYdwfpxMQkSowGTFUCS5MSu9bWfSZMewGpp7bFc66D7Q==}
     engines: {node: '>=18'}
@@ -16399,6 +16419,10 @@ packages:
   object-copy@0.1.0:
     resolution: {integrity: sha512-79LYn6VAb63zgtmAteVOWo9Vdj71ZVBy3Pbse+VqxDpEP83XuujMrGqHIwAXJ5I/aM0zU7dIyIAhifVTPrNItQ==}
     engines: {node: '>=0.10.0'}
+
+  object-hash@2.2.0:
+    resolution: {integrity: sha512-gScRMn0bS5fH+IuwyIFgnh9zBdo4DV+6GhygmWM9HyNJSgS0hScp1f5vjtm7oIIOiT9trXrShAkLFSc2IqKNgw==}
+    engines: {node: '>= 6'}
 
   object-hash@3.0.0:
     resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
@@ -26889,6 +26913,11 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
+  '@pppp606/ink-chart@0.1.1(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      ink: 6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3)
+      react: 19.2.3
+
   '@puppeteer/browsers@2.10.5':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
@@ -30571,7 +30600,7 @@ snapshots:
       sirv: 3.0.1
       tinyglobby: 0.2.14
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@27.4.0)(lightningcss@1.30.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@20.17.57)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@27.4.0)(lightningcss@1.30.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/utils@2.0.5':
     dependencies:
@@ -36303,6 +36332,12 @@ snapshots:
       ink: 6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3)
       terminal-link: 5.0.0
 
+  ink-table@3.1.0(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3))(react@19.2.3):
+    dependencies:
+      ink: 6.6.0(@types/react@19.2.7)(react-devtools-core@7.0.1)(react@19.2.3)
+      object-hash: 2.2.0
+      react: 19.2.3
+
   ink-testing-library@4.0.0(@types/react@19.2.7):
     optionalDependencies:
       '@types/react': 19.2.7
@@ -39602,6 +39637,8 @@ snapshots:
       copy-descriptor: 0.1.1
       define-property: 0.2.5
       kind-of: 3.2.2
+
+  object-hash@2.2.0: {}
 
   object-hash@3.0.0: {}
 
