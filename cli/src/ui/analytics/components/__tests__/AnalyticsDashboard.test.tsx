@@ -7,13 +7,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render } from "ink-testing-library"
 import { AnalyticsDashboard } from "../../AnalyticsDashboard.js"
 import { useAtomValue } from "jotai"
-import * as useThemeHook from "../../../../../state/hooks/useTheme.js"
+import * as useThemeHook from "../../../../state/hooks/useTheme.js"
 
 // Mock the hooks and atoms
 vi.mock("jotai")
-vi.mock("../../../../../state/hooks/useTheme.js")
+vi.mock("../../../../state/hooks/useTheme.js")
 
 const mockTheme = {
+	id: "dark",
 	name: "dark",
 	type: "dark" as const,
 	code: {
