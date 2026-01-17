@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phases 1-2 Complete)
+**Status:** In Progress (Phases 1-2 Complete, Phase 3 Planned)
 **Date:** 2026-01-17
 
 ## Overview
@@ -84,28 +84,32 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Transform raw DB events into reactive state for the UI.
 
-- **Tasks:**
+**Plans:** 3 plans (Wave 1: 1 plan, Wave 2: 1 plan, Wave 3: 1 plan)
 
-    - [ ] Implement efficient SQL aggregation queries in `StorageService`
-    - [ ] Create Jotai atoms for `currentSessionMetrics`
-    - [ ] Create atoms for `historicalSessions`
-    - [ ] Implement derived atoms for rates (tokens/min, error rate)
-    - [ ] Wire up `MetricsCollector` events to update atoms
+**Plan List:**
 
-- **Success Criteria:**
+- [ ] 03-01-PLAN.md — Build AggregationService with SQL window functions and QueryCache
+- [ ] 03-02-PLAN.md — Create Jotai atoms for reactive analytics state
+- [ ] 03-03-PLAN.md — Wire MetricsCollector events to trigger atom updates
 
-    - Atoms update in real-time as events occur
-    - Aggregation queries take <10ms
-    - Derived state calculates correctly
-    - "Current session" state is accurate
+**Success Criteria:**
 
-- **Key Files:**
+- Atoms update in real-time as events occur
+- Aggregation queries take <10ms
+- Derived state calculates correctly
+- "Current session" state is accurate
 
-    - `cli/src/state/atoms/analytics.ts`
-    - `cli/src/services/analytics/StorageService.ts` (queries)
+**Key Files:**
 
-- **Risks:**
-    - Render thrashing from too many updates (Mitigation: Debounce/throttle atoms)
+- `cli/src/services/analytics/AggregationService.ts`
+- `cli/src/services/analytics/QueryCache.ts`
+- `cli/src/state/atoms/analytics.ts`
+- `cli/src/services/analytics/AnalyticsStateIntegration.ts`
+
+**Risks:**
+
+- Render thrashing from too many updates (Mitigation: 100ms debounce on atom updates)
+- Slow aggregation queries (Mitigation: SQLite window functions + 5-second cache)
 
 ---
 
@@ -136,6 +140,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
     - `cli/src/commands/stats.ts`
 
 - **Risks:**
+
     - Render storms (Mitigation: `useThrottle` custom hook)
     - Layout breaking on small screens
 
@@ -165,6 +170,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
     - `cli/src/commands/export.ts`
 
 - **Risks:**
+
     - Privacy leaks in exports
 
 ## Milestones
