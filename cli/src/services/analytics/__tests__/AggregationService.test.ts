@@ -9,19 +9,19 @@ import AggregationService, {
 	type SessionListItem,
 	type TokenPerMinute,
 } from "../AggregationService"
-import StorageService from "../StorageService"
 import { aggregationCache } from "../QueryCache"
 
 // Mock StorageService
+const mockGetDatabase = vi.fn(() => ({
+	execute: vi.fn(),
+}))
+
 vi.mock("../StorageService", () => ({
-	default: vi.fn().mockImplementation(() => ({
-		getDatabase: vi.fn(() => ({
-			execute: vi.fn(),
+	default: {
+		getInstance: vi.fn(() => ({
+			getDatabase: mockGetDatabase,
 		})),
-		getInstance: vi.fn(function () {
-			return this
-		}),
-	})),
+	},
 }))
 
 // Mock QueryCache
@@ -47,8 +47,7 @@ describe("AggregationService", () => {
 		;(AggregationService as { instance?: AggregationService }).instance = undefined
 
 		// Get mock instances
-		const mockStorage = StorageService.getInstance() as unknown as StorageService
-		mockDb = mockStorage.getDatabase() as { execute: ReturnType<typeof vi.fn> }
+		mockDb = mockGetDatabase() as { execute: ReturnType<typeof vi.fn> }
 		mockCache = aggregationCache
 
 		// Get service instance
