@@ -247,6 +247,22 @@ export {
 } from "./ui.js"
 
 // ============================================================================
+// Analytics Atoms - Session metrics and aggregation state
+// ============================================================================
+export {
+	// Core analytics atoms
+	currentSessionIdAtom,
+	sessionMetricsAtom,
+	tokenUsageTimelineAtom,
+	historicalSessionsAtom,
+	tokensPerMinuteAtom,
+
+	// Analytics action atoms
+	refreshAnalyticsAtom,
+	debouncedRefreshAtom,
+} from "./analytics.js"
+
+// ============================================================================
 // Type Re-exports
 // ============================================================================
 export type { ExtensionService } from "../../services/extension.js"
