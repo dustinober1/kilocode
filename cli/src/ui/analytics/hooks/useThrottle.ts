@@ -27,7 +27,13 @@ const debounceFn = require("lodash.debounce") as <T extends (...args: unknown[])
 export function useThrottle<T>(value: T, delay: number): T {
 	const [throttledValue, setThrottledValue] = useState<T>(value)
 
-	const debouncedSetValue = useMemo(() => debounceFn((newValue: T) => setThrottledValue(newValue), delay), [delay])
+	const debouncedSetValue = useMemo(
+		() =>
+			debounceFn((newValue: unknown) => {
+				setThrottledValue(newValue as T)
+			}, delay),
+		[delay],
+	)
 
 	useEffect(() => {
 		debouncedSetValue(value)

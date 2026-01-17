@@ -21,6 +21,7 @@ import { logs } from "./services/logs.js"
 import { validateAttachments, validateAttachRequiresAuto, accumulateAttachments } from "./validation/attachments.js"
 import { resolveExclusiveTextOrFile, resolveInitialPrompt } from "./utils/promptFiles.js"
 import { validateOnTaskCompletedPrompt } from "./pr/on-task-completed.js"
+import { tableCommand } from "./commands/table.js"
 
 // Log CLI location for debugging (visible in VS Code "Kilo-Code" output channel)
 logs.info(`CLI started from: ${import.meta.url}`)
@@ -70,7 +71,7 @@ program
 		// Subcommand names - if prompt matches one, Commander.js should handle it via subcommand
 		// This is a defensive check for cases where Commander.js routing might not work as expected
 		// (e.g., when spawned as a child process with stdin disconnected)
-		const SUBCOMMANDS = ["auth", "config", "debug", "models"]
+		const SUBCOMMANDS = ["auth", "config", "debug", "models", "table"]
 		if (SUBCOMMANDS.includes(prompt)) {
 			return
 		}
@@ -390,6 +391,9 @@ program
 		const { modelsApiCommand } = await import("./commands/models-api.js")
 		await modelsApiCommand(options)
 	})
+
+// Table command - display a sample ink-table
+program.addCommand(tableCommand)
 
 // Handle process termination signals
 process.on("SIGINT", async () => {

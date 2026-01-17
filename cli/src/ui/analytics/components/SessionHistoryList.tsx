@@ -1,7 +1,7 @@
 /**
  * SessionHistoryList component - displays historical sessions table
  *
- * Shows recent sessions with ID, title, creation date, and event count
+ * Shows recent sessions with ID, start time, and command count
  * using ink-table for tabular display with custom styling
  */
 
@@ -24,10 +24,9 @@ export const SessionHistoryList = React.memo(() => {
 	const tableData = useMemo(
 		() =>
 			sessions.map((session) => ({
-				id: session.session_id.slice(0, 8),
-				title: session.title || "Untitled",
-				created: new Date(session.created_at).toLocaleDateString(),
-				events: session.event_count.toString(),
+				id: session.id.slice(0, 8),
+				startTime: session.startTime.toLocaleDateString(),
+				commands: session.commandCount.toString(),
 			})),
 		[sessions],
 	)
@@ -50,7 +49,7 @@ export const SessionHistoryList = React.memo(() => {
 			</Text>
 			<Table
 				data={tableData}
-				columns={["id", "title", "created", "events"]}
+				columns={["id", "startTime", "commands"]}
 				padding={1}
 				header={(props) => (
 					<Text bold color={theme.ui.text.highlight}>

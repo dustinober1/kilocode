@@ -1,7 +1,7 @@
 /**
  * SessionMetricsPanel component - displays real-time session metrics
  *
- * Shows event count, duration, and start time for the current session
+ * Shows event count and time range for the current session
  * with loading state and theme integration
  */
 
@@ -32,9 +32,11 @@ export const SessionMetricsPanel = React.memo<SessionMetricsPanelProps>(({ sessi
 	}
 
 	const stats = [
-		{ label: "Events", value: metrics.event_count.toString() },
-		{ label: "Duration", value: `${Math.floor(metrics.total_duration / 60)}m` },
-		{ label: "Started", value: new Date(metrics.first_event).toLocaleTimeString() },
+		{ label: "Events", value: metrics.eventCount.toString() },
+		{
+			label: "Started",
+			value: metrics.firstEvent ? new Date(metrics.firstEvent).toLocaleTimeString() : "N/A",
+		},
 	]
 
 	return (
