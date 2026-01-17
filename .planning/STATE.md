@@ -1,18 +1,18 @@
 # Project State
 
 **Current Phase:** 03 - State & Aggregation
-**Plan:** 02 of 2 (Jotai State Atoms)
+**Plan:** 03 of 3 (MetricsCollector Integration)
 **Status:** Phase complete
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 complete: Aggregation layer with SQL window functions, query caching, and Jotai state atoms for reactive analytics.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 complete: Aggregation layer with SQL window functions, query caching, Jotai state atoms, and event-to-atom bridge for real-time updates.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
 ███████████████████████████████████████ 100% (Phase 2 complete: 3/3 plans)
-███████████████████████████████████████ 100% (Phase 3 complete: 2/2 plans)
+███████████████████████████████████████ 100% (Phase 3 complete: 3/3 plans)
 
 ## Decisions Made
 
@@ -88,6 +88,15 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Derived atoms pattern:** async (get) => {...} for database queries via AggregationService
 - **Central atom exports:** Analytics atoms exported from index.ts following existing patterns
 
+#### Plan 03-03: MetricsCollector Integration (Complete)
+
+- **Event-to-atom bridge pattern:** MetricsCollector events → Jotai atoms via getDefaultStore().set()
+- **100ms debounce delay:** Balances responsiveness with performance for flush events
+- **Empty sessionId handling:** Skips both cache invalidation and atom refresh when no active session
+- **session:end immediate refresh:** No debounce on session end - final metrics needed immediately
+- **Single initialization:** Integration initialized once during CLI startup
+- **Non-blocking integration:** Wrap initialization in try-catch to prevent analytics errors from breaking CLI
+
 ### Earlier Decisions
 
 - See .planning/research/SUMMARY.md for initial architectural decisions
@@ -120,12 +129,11 @@ None - Phase 03 complete. Ready for Phase 04 (Dashboard UI) or begin planning ne
 - **Node version compatibility:** Development on Node v25.2.1 is fine, but production should use Node v20 LTS for stable native bindings
 - **Integration test validation:** Tests should be run on Node v20 LTS to verify complete pipeline before production deployment
 - **Performance validation:** <5ms emit, <50ms flush, and <10ms aggregation query requirements should be validated in production-like environment
-- **MetricsCollector integration:** Need to wire up MetricsCollector flush events to trigger debouncedRefreshAtom in Phase 04
 
 ## Session Continuity
 
 **Last session:** 2026-01-17
-**Stopped at:** Completed Phase 03 Plan 02 (Jotai State Atoms)
+**Stopped at:** Completed Phase 03 Plan 03 (MetricsCollector Integration)
 **Resume file:** None (plan complete)
 
 **Ready for:** Execute Phase 04 (Dashboard UI) or begin planning next phase
