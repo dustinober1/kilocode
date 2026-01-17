@@ -12,12 +12,22 @@
  */
 
 import { useEffect, useMemo, useState } from "react"
-import { debounce } from "lodash.debounce"
+
+// Type declaration for lodash.debounce (CommonJS module)
+type DebounceFunction<T extends (...args: unknown[]) => unknown> = T & { cancel(): void }
+
+// Import debounce from lodash.debounce
+// Note: Using require to avoid TypeScript declaration issues with CommonJS module
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const debounceFn = require("lodash.debounce") as <T extends (...args: unknown[]) => unknown>(
+	func: T,
+	wait: number,
+) => DebounceFunction<T>
 
 export function useThrottle<T>(value: T, delay: number): T {
 	const [throttledValue, setThrottledValue] = useState<T>(value)
 
-	const debouncedSetValue = useMemo(() => debounce((newValue: T) => setThrottledValue(newValue), delay), [delay])
+	const debouncedSetValue = useMemo(() => debounceFn((newValue: T) => setThrottledValue(newValue), delay), [delay])
 
 	useEffect(() => {
 		debouncedSetValue(value)
