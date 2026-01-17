@@ -69,3 +69,37 @@ export const tokensPerMinuteAtom = atom(async (get) => {
 	const aggregation = AggregationService.getInstance()
 	return await aggregation.getTokensPerMinute(sessionId)
 })
+
+// ============================================================================
+// Analytics Action Atoms - Write-only atoms for triggering updates
+// ============================================================================
+
+/**
+ * Write-only atom to trigger refresh of all derived atoms
+ * Forces re-computation by updating currentSessionIdAtom with same value
+ */
+export const refreshAnalyticsAtom = atom(null, async (get, set) => {
+	// Force re-computation by updating currentSessionIdAtom with same value
+	const currentId = get(currentSessionIdAtom)
+	set(currentSessionIdAtom, currentId)
+})
+
+/**
+ * Module-scoped timeout for debounced refresh
+ * Persists across atom calls
+ */
+let refreshTimeout: ReturnType<typeof setTimeout> | null = null
+
+/**
+ * Write-only debounced refresh atom with 100ms delay
+ * Clears existing timeout before scheduling new one
+ */
+export const debouncedRefreshAtom = atom(null, async (get, set) => {
+	if (refreshTimeout) {
+		clearTimeout(refreshTimeout)
+	}
+	refreshTimeout = setTimeout(async () => {
+		set(refreshAnalyticsAtom)
+		refreshTimeout = null
+	}, 100)
+})
