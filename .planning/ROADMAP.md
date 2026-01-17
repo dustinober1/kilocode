@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phases 1-3 Complete, Phase 4 Planned)
+**Status:** In Progress (Phases 1-3 Complete, Phase 4 In Progress - Gap Closure)
 **Date:** 2026-01-17
 
 ## Overview
@@ -117,13 +117,15 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Visualize metrics in the terminal in a beautiful, responsive way.
 
-**Plans:** 3 plans (Wave 1: 1 plan, Wave 2: 1 plan, Wave 3: 1 plan)
+**Plans:** 5 plans (Wave 1: 1 plan, Wave 2: 1 plan, Wave 3: 1 plan, Wave 4: 1 plan, Wave 5: 1 plan)
 
 **Plan List:**
 
-- [ ] 04-01-PLAN.md — Install @pppp606/ink-chart and implement useThrottle hook
-- [ ] 04-02-PLAN.md — Build SessionMetricsPanel, TokenUsageChart, and SessionHistoryList components
-- [ ] 04-03-PLAN.md — Create AnalyticsDashboard container and /stats command
+- [x] 04-01-PLAN.md — Install @pppp606/ink-chart and implement useThrottle hook
+- [x] 04-02-PLAN.md — Build SessionMetricsPanel, TokenUsageChart, and SessionHistoryList components
+- [x] 04-03-PLAN.md — Create AnalyticsDashboard container and /stats command
+- [ ] 04-04-PLAN.md — Integrate AnalyticsDashboard into UI.tsx with state management (gap closure)
+- [ ] 04-05-PLAN.md — Enhance /stats command to render dashboard and add keyboard shortcuts (gap closure)
 
 **Success Criteria:**
 
@@ -137,6 +139,8 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 - `cli/src/ui/analytics/AnalyticsDashboard.tsx`
 - `cli/src/ui/analytics/components/`
 - `cli/src/commands/stats.ts`
+- `cli/src/state/atoms/analytics.ts` (showDashboardAtom)
+- `cli/src/ui/UI.tsx` (conditional rendering)
 
 **Risks:**
 
