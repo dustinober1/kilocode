@@ -38,6 +38,7 @@ import { SessionManager } from "../../src/shared/kilocode/cli-sessions/core/Sess
 import { triggerExitConfirmationAtom } from "./state/atoms/keyboard.js"
 import { randomUUID } from "crypto"
 import MetricsCollectorService from "./services/analytics/MetricsCollectorService.js"
+import { initializeAnalyticsStateIntegration } from "./services/analytics/AnalyticsStateIntegration.js"
 
 /**
  * Main application class that orchestrates the CLI lifecycle
@@ -95,6 +96,15 @@ export class CLI {
 
 			// Setup graceful shutdown handlers for metrics
 			this.setupShutdownHandlers()
+
+			// Initialize analytics state integration
+			// Bridges MetricsCollector events to Jotai atoms for real-time updates
+			try {
+				initializeAnalyticsStateIntegration()
+				logs.debug("Analytics state integration initialized", "CLI")
+			} catch (error) {
+				console.error("Failed to initialize analytics state integration:", error)
+			}
 
 			// Initialize telemetry service first to get identity
 			let config = await this.store.set(loadConfigAtom, this.options.mode)
