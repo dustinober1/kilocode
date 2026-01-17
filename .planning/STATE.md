@@ -1,12 +1,12 @@
 # Project State
 
 **Current Phase:** 01 - Storage Foundation
-**Plan:** 1 of 1
-**Status:** Complete
+**Plan:** 2 of 2
+**Status:** Phase Complete
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Critical bugs fixed. Storage layer stable and ready for integration.
 
 ## Progress
 
@@ -22,6 +22,10 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **WAL mode configuration:** journal_mode=WAL, synchronous=NORMAL, busy_timeout=5000
 - **Batch insertion:** 100-event queue with 1-second periodic flush for <50ms performance
 - **Automatic migrations:** Run on StorageService startup using drizzle-orm migrator
+- **Async close pattern:** close() must be async and await flushEvents() to prevent data loss (Plan 02)
+- **Node v20 LTS requirement:** Tests verified on Node v20 LTS due to better-sqlite3 native binding compatibility (Plan 02)
+- **Performance test accuracy:** Must measure flushEvents() not insertEvents() to verify actual DB write time (Plan 02)
+- **Deferred e2e verification:** End-to-end CLI restart test deferred to Phase 02 when StorageService integrates with CLI (Plan 02)
 
 ### Earlier Decisions
 
@@ -31,18 +35,24 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-- **Test verification pending:** Cannot run StorageService tests on Node v25.2.1 due to better-sqlite3 native binding compilation. Workaround: Run tests on Node v20 LTS.
-- **Build verification pending:** CLI build with native bindings not tested end-to-end. Verify `pnpm build && pnpm deps:install` produces working native bindings.
+None - Phase 01 complete and stable.
+
+### Resolved (Plan 02)
+
+- **Test verification:** All tests pass on Node v20 LTS (user-approved)
+- **Build verification:** Native bindings build correctly (user-approved)
+- **Critical data loss bug:** Fixed - close() now async and awaits flushEvents()
+- **Performance test accuracy:** Fixed - now measures actual DB write time
 
 ### Concerns
 
-- **Node version compatibility:** Current Node v25.2.1 is too new for better-sqlite3 prebuilt binaries
-- **Native binding distribution:** Need to verify deps:install script properly installs native modules in dist/
+- **Node version compatibility:** Development on Node v25.2.1 is fine, but production should use Node v20 LTS for stable native bindings
+- **E2e verification deferred:** CLI restart persistence will be verified in Phase 02 during integration (this is expected, not a concern)
 
 ## Session Continuity
 
-**Last session:** 2026-01-17T13:12:48Z
-**Stopped at:** Completed Phase 01 Plan 01 (01-storage-foundation.PLAN.md)
+**Last session:** 2025-01-17
+**Stopped at:** Completed Phase 01 Plan 02 (01-02-fix-critical-bugs.PLAN.md)
 **Resume file:** None (plan complete)
 
-**Ready for:** Phase 02 - Metrics Collection
+**Ready for:** Phase 02 - Metrics Collection Layer
