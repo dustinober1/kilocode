@@ -17,14 +17,11 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Establish a performant, schema-safe local database layer that survives CLI restarts.
 
-- **Tasks:**
+**Plans:** 1 plan (Wave 1)
 
-    - [ ] Install `better-sqlite3`, `drizzle-orm`, `drizzle-kit`
-    - [ ] Implement `StorageService` class with singleton/connection pooling
-    - [ ] Define Drizzle schema for `sessions` and `metric_events`
-    - [ ] Configure SQLite WAL mode for performance
-    - [ ] Create initial migration infrastructure
-    - [ ] Verify database persists data across process restarts
+**Plan List:**
+
+- [ ] 01-01-PLAN.md — Implement singleton StorageService with WAL mode, schema, migrations, and tests
 
 - **Success Criteria:**
 
@@ -32,6 +29,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
     - Can write 1000 events in <50ms (batched)
     - Data persists after CLI exit
     - No "database locked" errors with multiple instances
+    - Native bindings compiled correctly in CLI build
 
 - **Key Files:**
 
@@ -41,7 +39,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 - **Risks:**
     - Blocking main thread (Mitigation: WAL mode, async batching)
-    - Native binding issues with `better-sqlite3`
+    - Native binding issues with `better-sqlite3` (Mitigation: Verify build process)
 
 ---
 
