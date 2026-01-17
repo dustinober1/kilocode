@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** Planning
+**Status:** In Progress (Phase 1 Complete)
 **Date:** 2026-01-17
 
 ## Overview
@@ -13,7 +13,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 ## Phases
 
-### Phase 1: Storage Foundation
+### Phase 1: Storage Foundation ✓
 
 **Goal:** Establish a performant, schema-safe local database layer that survives CLI restarts.
 
@@ -22,7 +22,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 **Plan List:**
 
 - [x] 01-01-PLAN.md — Implement singleton StorageService with WAL mode, schema, migrations, and tests
-- [ ] 01-02-fix-critical-bugs.PLAN.md — Fix close() data loss bug and clarify performance test (gap closure)
+- [x] 01-02-fix-critical-bugs.PLAN.md — Fix close() data loss bug and clarify performance test (gap closure)
 
 - **Success Criteria:**
 
