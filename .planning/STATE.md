@@ -1,19 +1,19 @@
 # Project State
 
 **Current Phase:** 04 - Dashboard UI
-**Plan:** 03 of 3 (Dashboard Integration)
-**Status:** In progress
+**Plan:** 05 of 5 (Command Integration & Keyboard Shortcuts)
+**Status:** Complete
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 complete: Aggregation layer with SQL window functions, query caching, Jotai state atoms, and event-to-atom bridge for real-time updates. Phase 04 in progress: Chart library and useThrottle hook foundation for dashboard UI.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 complete: Aggregation layer with SQL window functions, query caching, Jotai state atoms, and event-to-atom bridge for real-time updates. Phase 04 complete: Dashboard UI with chart library, components, integration, command interface, and keyboard navigation.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
 ███████████████████████████████████████ 100% (Phase 2 complete: 3/3 plans)
 ███████████████████████████████████████ 100% (Phase 3 complete: 3/3 plans)
-█████████████████████████████████████████ 100% (Phase 4 complete: 3/3 plans)
+███████████████████████████████████████ 100% (Phase 4 complete: 5/5 plans)
 
 ## Decisions Made
 
@@ -45,6 +45,25 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Do NOT modify UI.tsx:** Explicitly decided to defer main UI integration to maintain plan scope
 - **No standalone render():** Following command pattern, using addMessage() instead of direct render() to maintain main UI flow
 - **Command aliases:** Added "dashboard" and "analytics" for discoverability
+
+#### Plan 04-04: Main UI Integration (Complete)
+
+- **Boolean atom pattern:** Used simple writable atom with boolean value (false = main UI, true = dashboard) for toggle state
+- **useAtomValue for read-only:** UI.tsx uses useAtomValue instead of useAtom since it only reads the atom, doesn't write to it
+- **Preserve existing UI:** All main UI components (MessageDisplay, StatusIndicator, CommandInput, StatusBar) remain when dashboard is not active
+- **No addMessage() call:** Dashboard replaces main UI entirely, so no need for placeholder messages in command handler
+- **TypeScript bug fixes:** Fixed pre-existing TypeScript errors in analytics services (db.execute() → better-sqlite3 API, missing override modifiers, test mocks)
+
+#### Plan 04-05: Command Integration & Keyboard Shortcuts (Complete)
+
+- **useSetAtom with explicit store:** Command handlers must pass `store: uiStore` to useSetAtom for proper Jotai integration
+- **getDefaultStore() for keyboard shortcuts:** Non-React keyboard handlers use getDefaultStore() for atom access
+- **Escape conditional behavior:** Escape key only affects dashboard state when dashboard is active, preserves normal escape behavior otherwise
+- **Ctrl+S toggle semantics:** Ctrl+S inverts current dashboard state (true → false, false → true) for convenient toggle
+- **No placeholder messages:** Removed placeholder approach, dashboard replaces main UI entirely via conditional rendering
+- **stats.ts line count:** Met >= 40 lines requirement with substantive implementation and documentation (56 lines)
+- **better-sqlite3 API pattern:** AggregationService uses raw better-sqlite3 database via getRawDatabase() for complex SQL queries
+- **Raw SQL access:** Added getRawDatabase() method to StorageService for AggregationService to use prepare().all()/.get() API
 
 ### Phase 01: Storage Foundation
 
@@ -135,7 +154,7 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-None - Phase 04 complete. All three plans finished (Chart Library, Dashboard Components, Dashboard Integration).
+None - Phase 04 complete. All five plans finished (Chart Library, Dashboard Components, Dashboard Integration, Main UI Integration, Command Integration & Keyboard Shortcuts).
 
 ### Resolved (Phase 04)
 
@@ -175,8 +194,8 @@ None - Phase 04 complete. All three plans finished (Chart Library, Dashboard Com
 
 ## Session Continuity
 
-**Last session:** 2026-01-17
-**Stopped at:** Completed Phase 04 Plan 03 (Dashboard Integration)
-**Resume file:** None (plan complete)
+**Last session:** 2025-01-17
+**Stopped at:** Completed Phase 04 Plans 04-04 and 04-05 (Main UI Integration, Command Integration & Keyboard Shortcuts)
+**Resume file:** None (all plans complete)
 
 **Ready for:** Begin Phase 05 planning or continue with additional features
