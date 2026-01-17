@@ -19,6 +19,12 @@ import AggregationService from "../../services/analytics/AggregationService.js"
 export const currentSessionIdAtom = atom<string>("")
 
 /**
+ * Writable atom to track dashboard visibility state
+ * When true, UI shows AnalyticsDashboard instead of main message view
+ */
+export const showDashboardAtom = atom<boolean>(false)
+
+/**
  * Read-only derived atom for session metrics
  * Automatically fetches metrics when currentSessionIdAtom changes
  * Returns null if no session is active
