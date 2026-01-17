@@ -3,7 +3,7 @@
  * Encapsulates all dependencies needed for command execution
  */
 
-import { useSetAtom, useAtomValue } from "jotai"
+import { useSetAtom, useAtomValue, useStore } from "jotai"
 import { useCallback } from "react"
 import type { CommandContext } from "../../commands/core/types.js"
 import type { CliMessage } from "../../types/cli.js"
@@ -90,6 +90,9 @@ export interface UseCommandContextReturn {
  * ```
  */
 export function useCommandContext(): UseCommandContextReturn {
+	// Get the Jotai store for atom access
+	const store = useStore()
+
 	// Get atoms and hooks
 	const addMessage = useSetAtom(addMessageAtom)
 	const clearMessages = useSetAtom(clearMessagesAtom)
@@ -245,6 +248,8 @@ export function useCommandContext(): UseCommandContextReturn {
 				updateModelListFilters,
 				changeModelListPage,
 				resetModelListState,
+				// Jotai store for atom access
+				uiStore: store,
 			}
 		},
 		[
@@ -287,6 +292,7 @@ export function useCommandContext(): UseCommandContextReturn {
 			updateModelListFilters,
 			changeModelListPage,
 			resetModelListState,
+			store,
 		],
 	)
 

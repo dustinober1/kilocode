@@ -9,6 +9,7 @@ import type { ProfileData, BalanceData } from "../../state/atoms/profile.js"
 import type { TaskHistoryData, TaskHistoryFilters } from "../../state/atoms/taskHistory.js"
 import type { ModelListFilters } from "../../state/atoms/modelList.js"
 import type { HistoryItem } from "@roo-code/types"
+import type { createStore } from "jotai"
 
 export interface Command {
 	name: string
@@ -86,6 +87,8 @@ export interface CommandContext {
 	updateModelListFilters: (filters: Partial<ModelListFilters>) => void
 	changeModelListPage: (pageIndex: number) => void
 	resetModelListState: () => void
+	// Jotai store for atom access (used by commands that need to update atoms directly)
+	uiStore: ReturnType<typeof createStore>
 }
 
 export type CommandHandler = (context: CommandContext) => Promise<void> | void
