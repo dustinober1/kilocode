@@ -1,17 +1,17 @@
 # Project State
 
 **Current Phase:** 02 - Data Collection Layer
-**Plan:** 02 of 3 (EventQueue Ring Buffer)
-**Status:** In Progress
+**Plan:** 01 of 3 (MetricsCollectorService)
+**Status:** Complete
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 planned: Metrics collection layer with EventEmitter architecture, PII sanitization, and CLI integration.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 in progress: Metrics collection layer with EventEmitter architecture, PII sanitization, and CLI integration.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
-████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 33% (Phase 2: 1/3 plans complete)
+█████████████░░░░░░░░░░░░░░░░░░░░░░░ 67% (Phase 2: 2/3 plans complete)
 
 ## Decisions Made
 
@@ -47,6 +47,17 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Comprehensive tests:** 22 test cases covering FIFO ordering, overflow, wraparound, edge cases
 - **Prerequisite types.ts:** Created types.ts as part of 02-02 (should have been 02-01, unblocked execution)
 
+#### Plan 02-01: MetricsCollectorService (Complete)
+
+- **EventEmitter singleton:** MetricsCollectorService extends EventEmitter for decoupled event capture
+- **PII sanitization before queue:** SHA-256 hashing to 16 chars for usernames, pattern redaction for sensitive prompts
+- **Privacy-first defaults:** Analytics enabled, PII hashing, and prompt filtering all true by default
+- **Non-blocking emit:** Events queued immediately (<5ms), flushed periodically (1s) for performance
+- **Graceful shutdown:** SIGTERM/SIGINT handlers with final flush and storage.close()
+- **Type-safe event emission:** Override emit() with generics for compile-time type checking
+- **Recursive sanitization:** Handles nested objects and arrays for complex data structures
+- **Session tracking:** startSession/endSession methods for session lifecycle management
+
 ### Earlier Decisions
 
 - See .planning/research/SUMMARY.md for initial architectural decisions
@@ -77,7 +88,7 @@ None - Phase 02 progressing.
 ## Session Continuity
 
 **Last session:** 2026-01-17
-**Stopped at:** Completed Phase 02 Plan 02 (EventQueue Ring Buffer)
+**Stopped at:** Completed Phase 02 Plan 01 (MetricsCollectorService)
 **Resume file:** None (plan complete)
 
-**Ready for:** Execute Phase 02 Plan 01 (MetricsCollectorService) or Plan 03 (CLI Integration)
+**Ready for:** Execute Phase 02 Plan 03 (CLI Integration)
