@@ -1,18 +1,18 @@
 # Project State
 
 **Current Phase:** 03 - State & Aggregation
-**Plan:** 01 of 2 (Aggregation Layer)
-**Status:** In progress
+**Plan:** 02 of 2 (Jotai State Atoms)
+**Status:** Phase complete
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 in progress: Aggregation layer with SQL window functions and query caching.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 complete: Aggregation layer with SQL window functions, query caching, and Jotai state atoms for reactive analytics.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
 ███████████████████████████████████████ 100% (Phase 2 complete: 3/3 plans)
-████████████░░░░░░░░░░░░░░░░░░░░░░░ 50% (Phase 3: 1/2 plans complete)
+███████████████████████████████████████ 100% (Phase 3 complete: 2/2 plans)
 
 ## Decisions Made
 
@@ -68,7 +68,7 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Session ID accessor:** getCurrentSessionId() provides access to current session for all services
 - **End-to-end testing:** Comprehensive integration tests verify complete pipeline from emission to database
 
-### Phase 03: State & Aggregation (In Progress)
+### Phase 03: State & Aggregation (Complete)
 
 #### Plan 03-01: Aggregation Layer (Complete)
 
@@ -79,6 +79,15 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Singleton pattern:** AggregationService matches StorageService architecture for consistency
 - **Snake_case to camelCase mapping:** Database returns running_total, code uses runningTotal for consistency
 
+#### Plan 03-02: Jotai State Atoms (Complete)
+
+- **100ms debounce delay:** Balances responsiveness with performance for refresh triggers
+- **Module-scoped timeout variable:** refreshTimeout persists across debouncedRefreshAtom calls
+- **Graceful null handling:** Derived atoms return null or empty array when no session ID
+- **Write-only refresh pattern:** Uses set(currentSessionIdAtom, currentId) to force re-computation
+- **Derived atoms pattern:** async (get) => {...} for database queries via AggregationService
+- **Central atom exports:** Analytics atoms exported from index.ts following existing patterns
+
 ### Earlier Decisions
 
 - See .planning/research/SUMMARY.md for initial architectural decisions
@@ -87,7 +96,7 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-None - Phase 03 Plan 01 complete. Ready for Phase 03 Plan 02 (Jotai State Atoms).
+None - Phase 03 complete. Ready for Phase 04 (Dashboard UI) or begin planning next phase.
 
 ### Resolved (Phase 02)
 
@@ -111,12 +120,12 @@ None - Phase 03 Plan 01 complete. Ready for Phase 03 Plan 02 (Jotai State Atoms)
 - **Node version compatibility:** Development on Node v25.2.1 is fine, but production should use Node v20 LTS for stable native bindings
 - **Integration test validation:** Tests should be run on Node v20 LTS to verify complete pipeline before production deployment
 - **Performance validation:** <5ms emit, <50ms flush, and <10ms aggregation query requirements should be validated in production-like environment
-- **Cache invalidation timing:** Need to wire up MetricsCollector flush events to trigger cache invalidation in Plan 03-02
+- **MetricsCollector integration:** Need to wire up MetricsCollector flush events to trigger debouncedRefreshAtom in Phase 04
 
 ## Session Continuity
 
 **Last session:** 2026-01-17
-**Stopped at:** Completed Phase 03 Plan 01 (Aggregation Layer)
+**Stopped at:** Completed Phase 03 Plan 02 (Jotai State Atoms)
 **Resume file:** None (plan complete)
 
-**Ready for:** Execute Phase 03 Plan 02 (Jotai State Atoms) or begin state layer planning
+**Ready for:** Execute Phase 04 (Dashboard UI) or begin planning next phase
