@@ -99,7 +99,7 @@ class MetricsCollectorService extends EventEmitter {
 	 * @param data - Event data matching the event type
 	 * @returns true if event was queued, false if analytics disabled or shutdown
 	 */
-	public emit<K extends keyof MetricsEvents>(event: K, data: MetricsEvents[K]): boolean {
+	public override emit<K extends keyof MetricsEvents>(event: K, data: MetricsEvents[K]): boolean {
 		// Check if shutdown
 		if (this.isShutdown) {
 			return false
@@ -122,8 +122,8 @@ class MetricsCollectorService extends EventEmitter {
 
 		this.queue.enqueue(metricEvent)
 
-		// Call super.emit for any listeners
-		return super.emit(event, data)
+		// Call super.emit for any listeners (EventEmitter.emit returns boolean)
+		return super.emit(event as string, data)
 	}
 
 	/**
@@ -159,8 +159,8 @@ class MetricsCollectorService extends EventEmitter {
 	public async shutdown(): Promise<void> {
 		this.isShutdown = true
 
-		// Emit shutdown event for any listeners
-		this.emit("shutdown")
+		// Emit shutdown event for any listeners (use EventEmitter.emit directly)
+		super.emit("shutdown" as string)
 
 		// Clear flush interval
 		if (this.flushInterval) {

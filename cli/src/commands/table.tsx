@@ -7,6 +7,7 @@ interface TableRow {
 	name: string
 	age: number
 	city: string
+	[key: string]: string | number // Index signature for ink-table compatibility
 }
 
 const data: TableRow[] = [

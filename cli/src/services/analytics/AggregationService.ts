@@ -5,7 +5,6 @@
  * All query results are cached with 5-second TTL for performance.
  */
 
-import { sql } from "drizzle-orm"
 import StorageService from "./StorageService"
 import { aggregationCache } from "./QueryCache"
 
@@ -41,10 +40,10 @@ export interface SessionListItem {
 
 class AggregationService {
 	private static instance: AggregationService
-	private db: ReturnType<typeof StorageService.prototype.getDatabase>
+	private db: ReturnType<typeof StorageService.prototype.getRawDatabase>
 
 	private constructor() {
-		this.db = StorageService.getInstance().getDatabase()
+		this.db = StorageService.getInstance().getRawDatabase()
 	}
 
 	public static getInstance(): AggregationService {
@@ -66,30 +65,24 @@ class AggregationService {
 			return cached
 		}
 
-		const result = await this.db.execute(
-			sql`
+		const stmt = this.db.prepare(`
         SELECT
           COUNT(*) as event_count,
           SUM(CAST(json_extract(metadata, '$.cost') AS INTEGER)) as total_cost,
           MIN(timestamp) as first_event,
           MAX(timestamp) as last_event
         FROM metric_events
-        WHERE session_id = ${sessionId}
-      `,
-		)
-
-		const row = result.rows[0] as unknown as {
-			event_count: number
-			total_cost: number | null
-			first_event: string | null
-			last_event: string | null
-		}
+        WHERE session_id = ?
+      `)
+		const result = stmt.get(sessionId) as
+			| { event_count: number; total_cost: number | null; first_event: string | null; last_event: string | null }
+			| undefined
 
 		const metrics: SessionMetrics = {
-			eventCount: row?.event_count || 0,
-			totalCost: row?.total_cost || 0,
-			firstEvent: row?.first_event ? new Date(row.first_event) : null,
-			lastEvent: row?.last_event ? new Date(row.last_event) : null,
+			eventCount: result?.event_count || 0,
+			totalCost: result?.total_cost || 0,
+			firstEvent: result?.first_event ? new Date(result.first_event) : null,
+			lastEvent: result?.last_event ? new Date(result.last_event) : null,
 		}
 
 		aggregationCache.set(cacheKey, metrics)
@@ -108,8 +101,7 @@ class AggregationService {
 			return cached
 		}
 
-		const result = await this.db.execute(
-			sql`
+		const stmt = this.db.prepare(`
         SELECT
           timestamp,
           CAST(json_extract(metadata, '$.promptTokens') AS INTEGER) +
@@ -122,27 +114,22 @@ class AggregationService {
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
           ) as running_total
         FROM metric_events
-        WHERE session_id = ${sessionId}
+        WHERE session_id = ?
           AND event_type = 'token:used'
         ORDER BY timestamp DESC
         LIMIT 100
-      `,
-		)
+      `)
+		const rows = stmt.all(sessionId) as Array<{
+			timestamp: string
+			tokens: number
+			running_total: number
+		}>
 
-		const timeline: TokenUsagePoint[] = result.rows
-			.map(
-				(row) =>
-					row as unknown as {
-						timestamp: string
-						tokens: number
-						running_total: number
-					},
-			)
-			.map((row) => ({
-				timestamp: new Date(row.timestamp),
-				tokens: row.tokens,
-				runningTotal: row.running_total,
-			}))
+		const timeline: TokenUsagePoint[] = rows.map((row) => ({
+			timestamp: new Date(row.timestamp),
+			tokens: row.tokens,
+			runningTotal: row.running_total,
+		}))
 
 		aggregationCache.set(cacheKey, timeline)
 		return timeline
@@ -160,8 +147,7 @@ class AggregationService {
 			return cached
 		}
 
-		const result = await this.db.execute(
-			sql`
+		const stmt = this.db.prepare(`
         SELECT
           id,
           start_time,
@@ -173,28 +159,29 @@ class AggregationService {
           exit_reason
         FROM sessions
         ORDER BY start_time DESC
-        LIMIT ${limit}
-      `,
-		)
+        LIMIT ?
+      `)
+		const rows = stmt.all(limit) as Array<{
+			id: string
+			start_time: string
+			end_time: string | null
+			total_tokens: number
+			total_cost: number
+			command_count: number
+			tool_usage_count: number
+			exit_reason: string | null
+		}>
 
-		const sessions: SessionListItem[] = result.rows
-			.map(
-				(row) =>
-					row as unknown as SessionListItem & {
-						start_time: string
-						end_time: string | null
-					},
-			)
-			.map((row) => ({
-				id: row.id,
-				startTime: new Date(row.start_time),
-				endTime: row.end_time ? new Date(row.end_time) : null,
-				totalTokens: row.total_tokens,
-				totalCost: row.total_cost,
-				commandCount: row.command_count,
-				toolUsageCount: row.tool_usage_count,
-				exitReason: row.exit_reason,
-			}))
+		const sessions: SessionListItem[] = rows.map((row) => ({
+			id: row.id,
+			startTime: new Date(row.start_time),
+			endTime: row.end_time ? new Date(row.end_time) : null,
+			totalTokens: row.total_tokens,
+			totalCost: row.total_cost,
+			commandCount: row.command_count,
+			toolUsageCount: row.tool_usage_count,
+			exitReason: row.exit_reason,
+		}))
 
 		aggregationCache.set(cacheKey, sessions)
 		return sessions
@@ -212,8 +199,7 @@ class AggregationService {
 			return cached
 		}
 
-		const result = await this.db.execute(
-			sql`
+		const stmt = this.db.prepare(`
         SELECT
           strftime('%Y-%m-%d %H:%M', timestamp) as minute,
           SUM(
@@ -221,17 +207,15 @@ class AggregationService {
             CAST(json_extract(metadata, '$.completionTokens') AS INTEGER)
           ) as tokens
         FROM metric_events
-        WHERE session_id = ${sessionId}
+        WHERE session_id = ?
           AND event_type = 'token:used'
         GROUP BY minute
         ORDER BY minute
-      `,
-		)
+      `)
+		const rows = stmt.all(sessionId) as TokenPerMinute[]
 
-		const tokensPerMinute: TokenPerMinute[] = result.rows as unknown as TokenPerMinute[]
-
-		aggregationCache.set(cacheKey, tokensPerMinute)
-		return tokensPerMinute
+		aggregationCache.set(cacheKey, rows)
+		return rows
 	}
 }
 

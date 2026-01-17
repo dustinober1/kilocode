@@ -14,6 +14,7 @@ vi.mock("jotai")
 vi.mock("../../../../state/hooks/useTheme.js")
 
 const mockTheme = {
+	id: "dark" as const,
 	name: "dark",
 	type: "dark" as const,
 	code: {

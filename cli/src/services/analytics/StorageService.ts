@@ -53,6 +53,16 @@ class StorageService {
 		return this.db
 	}
 
+	/**
+	 * Get the raw better-sqlite3 database instance for raw SQL queries
+	 * Used by AggregationService for complex SQL with window functions
+	 * @internal
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	public getRawDatabase(): any {
+		return this.sqlite
+	}
+
 	public async insertEvent(event: typeof schema.metricEvents.$inferInsert) {
 		// Add to queue for batch insertion
 		this.eventQueue.push(event)

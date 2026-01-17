@@ -29,6 +29,7 @@ vi.mock("ink", () => ({
 }))
 
 const mockTheme = {
+	id: "dark" as const,
 	name: "dark",
 	type: "dark" as const,
 	code: {
