@@ -132,14 +132,16 @@ class AggregationService {
 		const timeline: TokenUsagePoint[] = result.rows
 			.map(
 				(row) =>
-					row as unknown as TokenUsagePoint & {
+					row as unknown as {
 						timestamp: string
+						tokens: number
+						running_total: number
 					},
 			)
 			.map((row) => ({
 				timestamp: new Date(row.timestamp),
 				tokens: row.tokens,
-				runningTotal: row.runningTotal,
+				runningTotal: row.running_total,
 			}))
 
 		aggregationCache.set(cacheKey, timeline)
