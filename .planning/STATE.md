@@ -1,7 +1,7 @@
 # Project State
 
 **Current Phase:** 04 - Dashboard UI
-**Plan:** 01 of 3 (Chart Library & useThrottle Hook)
+**Plan:** 02 of 3 (Dashboard Components)
 **Status:** In progress
 
 ## Context
@@ -13,7 +13,7 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 ███████████████████████████████████████ 100% (Phase 1 complete)
 ███████████████████████████████████████ 100% (Phase 2 complete: 3/3 plans)
 ███████████████████████████████████████ 100% (Phase 3 complete: 3/3 plans)
-███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 33% (Phase 4 in progress: 1/3 plans)
+██████████████░░░░░░░░░░░░░░░░░░░░░░░░ 67% (Phase 4 in progress: 2/3 plans)
 
 ## Decisions Made
 
@@ -26,6 +26,16 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **lodash.debounce import pattern:** Use CommonJS require() with DebounceFunction type declaration for TypeScript compatibility
 - **Throttle delay default:** 100-150ms recommended for dashboard use cases
 - **Test approach for hooks:** Use vi.fn() mocks directly with debounce logic instead of @testing-library/react (not installed)
+
+#### Plan 04-02: Dashboard Components (Complete)
+
+- **Property naming convention:** Use camelCase from AggregationService (eventCount, runningTotal, id, startTime, commandCount)
+- **useStdout vs useStdoutDimensions:** useStdoutDimensions doesn't exist in Ink 6.6.0, use useStdout with manual resize event listeners
+- **React.memo pattern:** Wrap all dashboard components to prevent unnecessary re-renders
+- **Sparkline configuration:** height={1} mode="braille" for best terminal rendering (only valid values per type)
+- **Resize handling:** useStdout hook with useEffect stdout.on('resize') for responsive terminal layouts
+- **Theme integration:** useTheme() hook for accessing theme.ui.text._, theme.ui.border._ colors
+- **Throttle delay:** 150ms delay for TokenUsageChart to balance responsiveness with flicker prevention
 
 ### Phase 01: Storage Foundation
 
@@ -116,12 +126,17 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-None - Phase 04-01 complete. Ready for Phase 04-02 (Dashboard Components).
+None - Phase 04-02 complete. Ready for Phase 04-03 (Dashboard Integration).
 
 ### Resolved (Phase 04)
 
 - **TypeScript import error for lodash.debounce:** ES6 named import failed with TS7016. Fixed by using CommonJS require() with DebounceFunction type declaration.
 - **Linting errors for unused variables:** Fixed unused currentValue variables and unnecessary eslint-disable comments.
+- **Database property naming mismatch:** Plan specified snake_case but AggregationService returns camelCase. Fixed by using camelCase (eventCount, runningTotal, id, startTime, commandCount).
+- **useStdoutDimensions doesn't exist in Ink 6.6.0:** Fixed by using useStdout hook with manual resize event listeners.
+- **useThrottle TypeScript error:** DebounceFunction type mismatch. Fixed by using `unknown` parameter with `as T` cast.
+- **Sparkline height property type error:** height={8} invalid, only accepts 1 | 2 | "braille". Fixed with height={1} mode="braille".
+- **ink-table ESM compatibility with Vitest:** SessionHistoryList tests fail with ERR_REQUIRE_ASYNC_MODULE. Known limitation, component works at runtime.
 
 ### Resolved (Phase 02)
 
@@ -150,7 +165,7 @@ None - Phase 04-01 complete. Ready for Phase 04-02 (Dashboard Components).
 ## Session Continuity
 
 **Last session:** 2026-01-17
-**Stopped at:** Completed Phase 04 Plan 01 (Chart Library & useThrottle Hook)
+**Stopped at:** Completed Phase 04 Plan 02 (Dashboard Components)
 **Resume file:** None (plan complete)
 
-**Ready for:** Execute Phase 04 Plan 02 (Dashboard Components) or begin planning next phase
+**Ready for:** Execute Phase 04 Plan 03 (Dashboard Integration) or begin planning next phase
