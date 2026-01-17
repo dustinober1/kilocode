@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phases 1-3 Complete, Phase 4 In Progress - Gap Closure)
+**Status:** In Progress (Phases 1-4 Complete, Phase 5 Planned)
 **Date:** 2026-01-17
 
 ## Overview
@@ -124,8 +124,8 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 - [x] 04-01-PLAN.md — Install @pppp606/ink-chart and implement useThrottle hook
 - [x] 04-02-PLAN.md — Build SessionMetricsPanel, TokenUsageChart, and SessionHistoryList components
 - [x] 04-03-PLAN.md — Create AnalyticsDashboard container and /stats command
-- [ ] 04-04-PLAN.md — Integrate AnalyticsDashboard into UI.tsx with state management (gap closure)
-- [ ] 04-05-PLAN.md — Enhance /stats command to render dashboard and add keyboard shortcuts (gap closure)
+- [x] 04-04-PLAN.md — Integrate AnalyticsDashboard into UI.tsx with state management (gap closure)
+- [x] 04-05-PLAN.md — Enhance /stats command to render dashboard and add keyboard shortcuts (gap closure)
 
 **Success Criteria:**
 
