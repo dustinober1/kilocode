@@ -85,6 +85,14 @@ class MetricsCollectorService extends EventEmitter {
 	}
 
 	/**
+	 * Get the current session ID
+	 * @returns The current session ID or empty string if no active session
+	 */
+	public getCurrentSessionId(): string {
+		return this.currentSessionId || ""
+	}
+
+	/**
 	 * Emit a typed event with automatic PII sanitization and queueing
 	 * Non-blocking: returns immediately after queueing
 	 * @param event - Event type from MetricsEvents
