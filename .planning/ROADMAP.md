@@ -113,7 +113,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 ---
 
-### Phase 4: Dashboard UI
+### Phase 4: Dashboard UI ✓
 
 **Goal:** Visualize metrics in the terminal in a beautiful, responsive way.
 
@@ -153,28 +153,32 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Make data portable and ensure user control.
 
-- **Tasks:**
+**Plans:** 4 plans (Wave 1: 1 plan, Wave 2: 2 plans, Wave 3: 1 plan)
 
-    - [ ] Implement `ReportGenerator` service
-    - [ ] Add JSON export command
-    - [ ] Expose privacy configuration in user settings
-    - [ ] Add `kilo stats --history` view
-    - [ ] Final performance & privacy audit
+**Plan List:**
 
-- **Success Criteria:**
+- [ ] 05-01-PLAN.md — Build ReportGenerator service for JSON data export
+- [ ] 05-02-PLAN.md — Create /export command with file output
+- [ ] 05-03-PLAN.md — Create /privacy command and add /stats --history flag
+- [ ] 05-04-PLAN.md — Create performance and privacy audit documentation
 
-    - User can export data to JSON
-    - User can opt-out of specific metrics
-    - Full end-to-end verification
+**Success Criteria:**
 
-- **Key Files:**
+- User can export data to JSON
+- User can opt-out of specific metrics
+- Full end-to-end verification
 
-    - `cli/src/services/analytics/ReportGenerator.ts`
-    - `cli/src/commands/export.ts`
+**Key Files:**
 
-- **Risks:**
+- `cli/src/services/analytics/ReportGenerator.ts`
+- `cli/src/commands/export.ts`
+- `cli/src/commands/privacy.ts`
+- `.planning/phases/05-reports-polish/05-PERFORMANCE-AUDIT.md`
+- `.planning/phases/05-reports-polish/05-PRIVACY-AUDIT.md`
 
-    - Privacy leaks in exports
+**Risks:**
+
+- Privacy leaks in exports (Mitigation: Audit all data paths, test export sanitization)
 
 ## Milestones
 
