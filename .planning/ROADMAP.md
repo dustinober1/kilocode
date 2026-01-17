@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phase 1 Complete, Phase 2 Planned)
+**Status:** In Progress (Phases 1-2 Complete)
 **Date:** 2026-01-17
 
 ## Overview
@@ -45,17 +45,17 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 ---
 
-### Phase 2: Data Collection Layer
+### Phase 2: Data Collection Layer ✓
 
 **Goal:** Capture metrics from CLI activity without impacting user experience (latency).
 
-**Plans:** 3 plans (Wave 1: 2 plans, Wave 2: 1 plan)
+**Plans:** 3 plans (Wave 1: 1 plan, Wave 2: 1 plan, Wave 3: 1 plan)
 
 **Plan List:**
 
-- [ ] 02-01-PLAN.md — Build MetricsCollectorService with EventEmitter, types, PII sanitization, and privacy config
-- [ ] 02-02-PLAN.md — Implement EventQueue ring buffer to prevent memory leaks
-- [ ] 02-03-PLAN.md — Integrate with ExtensionService/TelemetryService and wire up session tracking
+- [x] 02-02-PLAN.md — Implement EventQueue ring buffer to prevent memory leaks
+- [x] 02-01-PLAN.md — Build MetricsCollectorService with EventEmitter, types, PII sanitization, and privacy config
+- [x] 02-03-PLAN.md — Integrate with ExtensionService/TelemetryService and wire up session tracking
 
 **Success Criteria:**
 
