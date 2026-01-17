@@ -36,7 +36,7 @@ vi.mock("../QueryCache", () => ({
 
 describe("AggregationService", () => {
 	let aggregationService: AggregationService
-	let mockDb: { execute: ReturnType<typeof vi.fn> }
+	let mockExecute: ReturnType<typeof vi.fn>
 	let mockCache: typeof aggregationCache
 
 	beforeEach(() => {
@@ -46,8 +46,14 @@ describe("AggregationService", () => {
 		// Reset singleton instance
 		;(AggregationService as { instance?: AggregationService }).instance = undefined
 
-		// Get mock instances
-		mockDb = mockGetDatabase() as { execute: ReturnType<typeof vi.fn> }
+		// Create mock execute function
+		mockExecute = vi.fn()
+
+		// Setup mockGetDatabase to return our mock execute
+		mockGetDatabase.mockReturnValue({
+			execute: mockExecute,
+		} as never)
+
 		mockCache = aggregationCache
 
 		// Get service instance
@@ -84,7 +90,7 @@ describe("AggregationService", () => {
 
 			expect(result).toEqual(cachedMetrics)
 			expect(mockCache.get).toHaveBeenCalledWith(`${sessionId}:metrics`)
-			expect(mockDb.execute).not.toHaveBeenCalled()
+			expect(mockExecute).not.toHaveBeenCalled()
 		})
 
 		it("queries database on cache miss", async () => {
@@ -101,11 +107,11 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getSessionMetrics(sessionId)
 
-			expect(mockDb.execute).toHaveBeenCalled()
+			expect(mockExecute).toHaveBeenCalled()
 			expect(result.eventCount).toBe(50)
 			expect(result.totalCost).toBe(250)
 			expect(mockCache.set).toHaveBeenCalled()
@@ -118,7 +124,7 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getSessionMetrics(sessionId)
 
@@ -151,7 +157,7 @@ describe("AggregationService", () => {
 
 			expect(result).toEqual(cachedTimeline)
 			expect(mockCache.get).toHaveBeenCalledWith(`${sessionId}:token-timeline`)
-			expect(mockDb.execute).not.toHaveBeenCalled()
+			expect(mockExecute).not.toHaveBeenCalled()
 		})
 
 		it("queries database on cache miss", async () => {
@@ -172,11 +178,11 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getTokenUsageTimeline(sessionId)
 
-			expect(mockDb.execute).toHaveBeenCalled()
+			expect(mockExecute).toHaveBeenCalled()
 			expect(result).toHaveLength(2)
 			expect(result[0].tokens).toBe(100)
 			expect(result[0].runningTotal).toBe(100)
@@ -207,7 +213,7 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getTokenUsageTimeline(sessionId)
 
@@ -239,7 +245,7 @@ describe("AggregationService", () => {
 
 			expect(result).toEqual(cachedSessions)
 			expect(mockCache.get).toHaveBeenCalledWith("historical:20")
-			expect(mockDb.execute).not.toHaveBeenCalled()
+			expect(mockExecute).not.toHaveBeenCalled()
 		})
 
 		it("queries database on cache miss", async () => {
@@ -259,11 +265,11 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getHistoricalSessions()
 
-			expect(mockDb.execute).toHaveBeenCalled()
+			expect(mockExecute).toHaveBeenCalled()
 			expect(result).toHaveLength(1)
 			expect(result[0].id).toBe("session-1")
 			expect(mockCache.set).toHaveBeenCalled()
@@ -271,7 +277,7 @@ describe("AggregationService", () => {
 
 		it("respects custom limit parameter", async () => {
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue({ rows: [] } as never)
+			vi.mocked(mockExecute).mockResolvedValue({ rows: [] } as never)
 
 			await aggregationService.getHistoricalSessions(50)
 
@@ -293,7 +299,7 @@ describe("AggregationService", () => {
 
 			expect(result).toEqual(cachedData)
 			expect(mockCache.get).toHaveBeenCalledWith(`${sessionId}:tokens-per-minute`)
-			expect(mockDb.execute).not.toHaveBeenCalled()
+			expect(mockExecute).not.toHaveBeenCalled()
 		})
 
 		it("queries database on cache miss", async () => {
@@ -307,11 +313,11 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getTokensPerMinute(sessionId)
 
-			expect(mockDb.execute).toHaveBeenCalled()
+			expect(mockExecute).toHaveBeenCalled()
 			expect(result).toHaveLength(3)
 			expect(result[0].minute).toBe("2025-01-01 00:00")
 			expect(result[0].tokens).toBe(100)
@@ -329,7 +335,7 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue(dbResult as never)
+			vi.mocked(mockExecute).mockResolvedValue(dbResult as never)
 
 			const result = await aggregationService.getTokensPerMinute(sessionId)
 
@@ -364,7 +370,7 @@ describe("AggregationService", () => {
 			}
 
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockImplementation(async () => {
+			vi.mocked(mockExecute).mockImplementation(async () => {
 				// Simulate minimal delay
 				await new Promise((resolve) => setTimeout(resolve, 1))
 				return dbResult as never
@@ -383,12 +389,12 @@ describe("AggregationService", () => {
 		it("uses correct OVER clause for running totals", async () => {
 			const sessionId = "test-session-123"
 			vi.mocked(mockCache.get).mockReturnValue(null)
-			vi.mocked(mockDb.execute).mockResolvedValue({ rows: [] } as never)
+			vi.mocked(mockExecute).mockResolvedValue({ rows: [] } as never)
 
 			await aggregationService.getTokenUsageTimeline(sessionId)
 
 			// Verify execute was called (SQL syntax is in the implementation)
-			expect(mockDb.execute).toHaveBeenCalled()
+			expect(mockExecute).toHaveBeenCalled()
 		})
 	})
 })
