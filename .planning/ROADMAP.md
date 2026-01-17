@@ -17,11 +17,12 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Establish a performant, schema-safe local database layer that survives CLI restarts.
 
-**Plans:** 1 plan (Wave 1)
+**Plans:** 2 plans (Wave 1: 1 plan, Wave 2: 1 plan)
 
 **Plan List:**
 
-- [ ] 01-01-PLAN.md — Implement singleton StorageService with WAL mode, schema, migrations, and tests
+- [x] 01-01-PLAN.md — Implement singleton StorageService with WAL mode, schema, migrations, and tests
+- [ ] 01-02-fix-critical-bugs.PLAN.md — Fix close() data loss bug and clarify performance test (gap closure)
 
 - **Success Criteria:**
 
