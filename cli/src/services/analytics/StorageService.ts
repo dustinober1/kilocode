@@ -73,7 +73,7 @@ class StorageService {
 		}
 	}
 
-	private async flushEvents() {
+	public async flushEvents() {
 		if (this.eventQueue.length === 0) return
 
 		const eventsToFlush = [...this.eventQueue]

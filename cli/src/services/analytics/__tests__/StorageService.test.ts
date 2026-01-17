@@ -15,11 +15,11 @@ describe("StorageService", () => {
 		StorageService.instance = null
 	})
 
-	afterEach(() => {
+	afterEach(async () => {
 		// Clean up test database
 		try {
 			const service = StorageService.getInstance()
-			service.close()
+			await service.close()
 			// @ts-expect-error - reset singleton for next test
 			StorageService.instance = null
 
@@ -31,16 +31,16 @@ describe("StorageService", () => {
 		}
 	})
 
-	it("should create database file at correct path", () => {
+	it("should create database file at correct path", async () => {
 		const dbPath = path.join(os.homedir(), ".kilocode", "analytics.db")
 		const service = StorageService.getInstance()
 
 		expect(fs.existsSync(dbPath)).toBe(true)
 
-		service.close()
+		await service.close()
 	})
 
-	it("should enable WAL mode", () => {
+	it("should enable WAL mode", async () => {
 		const service = StorageService.getInstance()
 
 		// Check WAL mode directly
@@ -50,7 +50,7 @@ describe("StorageService", () => {
 		sqlite.close()
 
 		expect(result).toBe("wal")
-		service.close()
+		await service.close()
 	})
 
 	it("should persist data across restarts", async () => {
@@ -67,7 +67,7 @@ describe("StorageService", () => {
 		})
 		// Wait for batch flush
 		await new Promise((resolve) => setTimeout(resolve, 1100))
-		service1.close()
+		await service1.close()
 
 		// Reset singleton to simulate restart
 		// @ts-expect-error -- accessing private property for testing
@@ -81,7 +81,7 @@ describe("StorageService", () => {
 		expect(sessions.length).toBeGreaterThanOrEqual(1)
 		const testSession = sessions.find((s) => s.id === sessionId)
 		expect(testSession).toBeDefined()
-		service2.close()
+		await service2.close()
 	})
 
 	it("should create WAL file during operation", async () => {
@@ -102,7 +102,7 @@ describe("StorageService", () => {
 		// WAL file should exist
 		expect(fs.existsSync(walPath)).toBe(true)
 
-		service.close()
+		await service.close()
 	})
 
 	it("should batch insert 1000 events in <50ms", async () => {
@@ -116,14 +116,15 @@ describe("StorageService", () => {
 			metadata: JSON.stringify({ index: i }),
 		}))
 
-		const start = Date.now()
+		// Queue the events
 		await service.insertEvents(events)
+
+		// Measure actual DB insertion time (not queue time)
+		const start = Date.now()
+		await service.flushEvents()
 		const duration = Date.now() - start
 
 		expect(duration).toBeLessThan(50)
-
-		// Wait for batch flush
-		await new Promise((resolve) => setTimeout(resolve, 1100))
 
 		// Verify events were inserted
 		const db = service.getDatabase()
@@ -131,6 +132,6 @@ describe("StorageService", () => {
 
 		expect(result.length).toBeGreaterThanOrEqual(1000)
 
-		service.close()
+		await service.close()
 	})
 })
