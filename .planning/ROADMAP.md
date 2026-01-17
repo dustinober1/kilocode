@@ -117,32 +117,31 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Visualize metrics in the terminal in a beautiful, responsive way.
 
-- **Tasks:**
+**Plans:** 3 plans (Wave 1: 1 plan, Wave 2: 1 plan, Wave 3: 1 plan)
 
-    - [ ] Install `@pppp606/ink-chart`, `ink-table`
-    - [ ] Build `SessionMetricsPanel` (real-time stats)
-    - [ ] Build `TokenUsageChart` (ASCII bars)
-    - [ ] Build `SessionHistoryList` (table view)
-    - [ ] Implement `kilo stats` command
-    - [ ] Implement throttled rendering hook
+**Plan List:**
 
-- **Success Criteria:**
+- [ ] 04-01-PLAN.md — Install @pppp606/ink-chart and implement useThrottle hook
+- [ ] 04-02-PLAN.md — Build SessionMetricsPanel, TokenUsageChart, and SessionHistoryList components
+- [ ] 04-03-PLAN.md — Create AnalyticsDashboard container and /stats command
 
-    - `kilo stats` shows live dashboard
-    - UI updates visibly without flickering
-    - Resizes correctly on window change
-    - Charts render accessibly
+**Success Criteria:**
 
-- **Key Files:**
+- `kilo stats` shows live dashboard
+- UI updates visibly without flickering
+- Resizes correctly on window change
+- Charts render accessibly
 
-    - `cli/src/ui/analytics/AnalyticsDashboard.tsx`
-    - `cli/src/ui/analytics/components/`
-    - `cli/src/commands/stats.ts`
+**Key Files:**
 
-- **Risks:**
+- `cli/src/ui/analytics/AnalyticsDashboard.tsx`
+- `cli/src/ui/analytics/components/`
+- `cli/src/commands/stats.ts`
 
-    - Render storms (Mitigation: `useThrottle` custom hook)
-    - Layout breaking on small screens
+**Risks:**
+
+- Render storms (Mitigation: `useThrottle` custom hook)
+- Layout breaking on small screens (Mitigation: Responsive layout testing on 80-column terminals)
 
 ---
 
