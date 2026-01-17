@@ -113,9 +113,9 @@ class StorageService {
 		}
 	}
 
-	public close() {
-		// Flush any remaining events
-		this.flushEvents()
+	public async close() {
+		// Flush any remaining events before closing
+		await this.flushEvents()
 
 		// Clear timer
 		if (this.flushTimer) {
