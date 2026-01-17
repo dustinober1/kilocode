@@ -88,27 +88,9 @@ describe("AnalyticsStateIntegration", () => {
 			expect(setSpy).toHaveBeenCalled()
 		})
 
-		it("skips cache invalidation when sessionId is empty", async () => {
+		it("skips cache invalidation and refresh when sessionId is empty", async () => {
 			const invalidateSpy = vi.spyOn(aggregationCache, "invalidate")
 
-			// Mock getCurrentSessionId to return empty string
-			// @ts-expect-error - accessing private property for testing
-			mockMetricsCollector.getCurrentSessionId.mockResolvedValue("")
-
-			// Initialize integration
-			initializeAnalyticsStateIntegration()
-
-			// Emit flush event
-			mockMetricsCollector.emit("flush")
-
-			// Wait for async handlers
-			await new Promise((resolve) => setTimeout(resolve, 10))
-
-			// Verify cache was NOT invalidated
-			expect(invalidateSpy).not.toHaveBeenCalled()
-		})
-
-		it("skips refresh when sessionId is empty", async () => {
 			// Mock getCurrentSessionId to return empty string
 			// @ts-expect-error - accessing private property for testing
 			mockMetricsCollector.getCurrentSessionId.mockResolvedValue("")
@@ -125,7 +107,9 @@ describe("AnalyticsStateIntegration", () => {
 			// Wait for async handlers
 			await new Promise((resolve) => setTimeout(resolve, 10))
 
-			// Verify store.set was NOT called (refresh is skipped when no session)
+			// Verify cache was NOT invalidated
+			expect(invalidateSpy).not.toHaveBeenCalled()
+			// Verify refresh was NOT triggered (no session = no data to refresh)
 			expect(setSpy).not.toHaveBeenCalled()
 		})
 	})

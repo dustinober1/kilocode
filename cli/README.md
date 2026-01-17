@@ -112,6 +112,41 @@ kilocode --auto "Refactor the auth module" --on-task-completed "Commit all chang
 - The agent has 90 seconds to complete the follow-up action
 - Supports markdown, special characters, and multi-line prompts
 
+#### File-Based Prompts
+
+File-based prompt flags allow you to read prompts from files instead of passing them as command-line arguments. This is especially useful for CI/CD pipelines to avoid shell quoting issues and for managing complex prompts in version control.
+
+**Available Flags:**
+
+- `--prompt-file <path>` - Reads the initial prompt from a file (UTF-8 encoded)
+- `--append-system-prompt-file <path>` - Reads system instructions from a file and appends them to the system prompt (UTF-8 encoded)
+- `--on-task-completed-file <path>` - Reads a follow-up prompt from a file to execute when the main task completes (UTF-8 encoded)
+
+**Usage Examples:**
+
+```bash
+# Initial prompt from file (CI-friendly)
+kilocode --auto --prompt-file .kilocode/prompts/fix-build.md --timeout 600
+
+# Append system instructions from file
+kilocode --append-system-prompt-file .kilocode/system/ci-rules.md
+
+# Follow-up action from file
+kilocode --auto "Implement feature X" --on-task-completed-file .kilocode/hooks/create-pr.md
+
+# JSON-IO mode: stdin is for JSON messages; prompt must come from arg or file
+kilocode --json-io --prompt-file .kilocode/prompts/task.md
+```
+
+**Important Notes:**
+
+- `--prompt-file` conflicts with the positional prompt argument (you cannot use both)
+- `--append-system-prompt-file` conflicts with `--append-system-prompt`
+- `--on-task-completed-file` conflicts with `--on-task-completed`
+- In `--json-io` mode, stdin is reserved for JSON messages, so the prompt must be provided via `--prompt-file` or the positional argument
+- All files are read as UTF-8 text
+- These flags are particularly useful in CI/CD pipelines where shell quoting can be problematic
+
 #### Autonomous mode Behavior
 
 When running in Autonomous mode (`--auto` flag):
