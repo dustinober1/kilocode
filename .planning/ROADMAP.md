@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phases 1-2 Complete, Phase 3 Planned)
+**Status:** In Progress (Phases 1-3 Complete, Phase 4 Planned)
 **Date:** 2026-01-17
 
 ## Overview
@@ -80,7 +80,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 ---
 
-### Phase 3: State & Aggregation
+### Phase 3: State & Aggregation ✓
 
 **Goal:** Transform raw DB events into reactive state for the UI.
 
@@ -88,9 +88,9 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Plan List:**
 
-- [ ] 03-01-PLAN.md — Build AggregationService with SQL window functions and QueryCache
-- [ ] 03-02-PLAN.md — Create Jotai atoms for reactive analytics state
-- [ ] 03-03-PLAN.md — Wire MetricsCollector events to trigger atom updates
+- [x] 03-01-PLAN.md — Build AggregationService with SQL window functions and QueryCache
+- [x] 03-02-PLAN.md — Create Jotai atoms for reactive analytics state
+- [x] 03-03-PLAN.md — Wire MetricsCollector events to trigger atom updates
 
 **Success Criteria:**
 
