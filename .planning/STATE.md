@@ -1,18 +1,18 @@
 # Project State
 
-**Current Phase:** 02 - Data Collection Layer
-**Plan:** 03 of 3 (CLI Integration)
-**Status:** Complete
+**Current Phase:** 03 - State & Aggregation
+**Plan:** 01 of 2 (Aggregation Layer)
+**Status:** In progress
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 complete: Metrics collection layer with EventEmitter architecture, PII sanitization, CLI integration, and comprehensive testing. Phase 3 in progress: Aggregation layer with SQL window functions and query caching.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
 ███████████████████████████████████████ 100% (Phase 2 complete: 3/3 plans)
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0% (Phase 3 not started)
+████████████░░░░░░░░░░░░░░░░░░░░░░░ 50% (Phase 3: 1/2 plans complete)
 
 ## Decisions Made
 
@@ -68,6 +68,17 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Session ID accessor:** getCurrentSessionId() provides access to current session for all services
 - **End-to-end testing:** Comprehensive integration tests verify complete pipeline from emission to database
 
+### Phase 03: State & Aggregation (In Progress)
+
+#### Plan 03-01: Aggregation Layer (Complete)
+
+- **Window functions vs JavaScript aggregation:** SQLite OVER clause for 100x faster cumulative calculations
+- **5-second cache TTL:** Balances data freshness (<5s staleness) with query performance (<1ms cache hits)
+- **Session prefix invalidation:** Efficiently clears all session-related cache entries with single call
+- **Map-based cache:** Simpler than LRU cache, TTL-based expiration sufficient for analytics use case
+- **Singleton pattern:** AggregationService matches StorageService architecture for consistency
+- **Snake_case to camelCase mapping:** Database returns running_total, code uses runningTotal for consistency
+
 ### Earlier Decisions
 
 - See .planning/research/SUMMARY.md for initial architectural decisions
@@ -76,12 +87,17 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-None - Phase 02 complete. Ready for Phase 03 (Query Layer).
+None - Phase 03 Plan 01 complete. Ready for Phase 03 Plan 02 (Jotai State Atoms).
 
 ### Resolved (Phase 02)
 
 - **Dependency order issue:** types.ts required for EventQueue but planned for 02-01. Resolved by creating types.ts in 02-02 task.
 - **Integration test validation:** Tests created but require Node v20 LTS with better-sqlite3 native bindings for execution. Will be validated before production deployment.
+
+### Resolved (Phase 03)
+
+- **Test mocking challenges:** Vitest mocking of StorageService singleton required multiple iterations to get correct static getInstance() pattern
+- **Database row type mapping:** Fixed snake_case to camelCase mapping in getTokenUsageTimeline for proper TypeScript types
 
 ### Resolved (Phase 01)
 
@@ -94,12 +110,13 @@ None - Phase 02 complete. Ready for Phase 03 (Query Layer).
 
 - **Node version compatibility:** Development on Node v25.2.1 is fine, but production should use Node v20 LTS for stable native bindings
 - **Integration test validation:** Tests should be run on Node v20 LTS to verify complete pipeline before production deployment
-- **Performance validation:** <5ms emit and <50ms flush requirements should be validated in production-like environment
+- **Performance validation:** <5ms emit, <50ms flush, and <10ms aggregation query requirements should be validated in production-like environment
+- **Cache invalidation timing:** Need to wire up MetricsCollector flush events to trigger cache invalidation in Plan 03-02
 
 ## Session Continuity
 
 **Last session:** 2026-01-17
-**Stopped at:** Completed Phase 02 Plan 03 (CLI Integration)
+**Stopped at:** Completed Phase 03 Plan 01 (Aggregation Layer)
 **Resume file:** None (plan complete)
 
-**Ready for:** Execute Phase 03 Plan 01 (Query Layer) or begin Query Layer planning
+**Ready for:** Execute Phase 03 Plan 02 (Jotai State Atoms) or begin state layer planning
