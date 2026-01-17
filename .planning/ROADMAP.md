@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phase 1 Complete)
+**Status:** In Progress (Phase 1 Complete, Phase 2 Planned)
 **Date:** 2026-01-17
 
 ## Overview
@@ -24,23 +24,24 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 - [x] 01-01-PLAN.md — Implement singleton StorageService with WAL mode, schema, migrations, and tests
 - [x] 01-02-fix-critical-bugs.PLAN.md — Fix close() data loss bug and clarify performance test (gap closure)
 
-- **Success Criteria:**
+**Success Criteria:**
 
-    - Database file creates at `~/.kilocode/analytics.db`
-    - Can write 1000 events in <50ms (batched)
-    - Data persists after CLI exit
-    - No "database locked" errors with multiple instances
-    - Native bindings compiled correctly in CLI build
+- Database file creates at `~/.kilocode/analytics.db`
+- Can write 1000 events in <50ms (batched)
+- Data persists after CLI exit
+- No "database locked" errors with multiple instances
+- Native bindings compiled correctly in CLI build
 
-- **Key Files:**
+**Key Files:**
 
-    - `cli/src/services/analytics/StorageService.ts`
-    - `cli/src/services/analytics/schema.ts`
-    - `cli/src/services/analytics/migrations/`
+- `cli/src/services/analytics/StorageService.ts`
+- `cli/src/services/analytics/schema.ts`
+- `cli/src/services/analytics/migrations/`
 
-- **Risks:**
-    - Blocking main thread (Mitigation: WAL mode, async batching)
-    - Native binding issues with `better-sqlite3` (Mitigation: Verify build process)
+**Risks:**
+
+- Blocking main thread (Mitigation: WAL mode, async batching)
+- Native binding issues with `better-sqlite3` (Mitigation: Verify build process)
 
 ---
 
@@ -48,31 +49,34 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Goal:** Capture metrics from CLI activity without impacting user experience (latency).
 
-- **Tasks:**
+**Plans:** 3 plans (Wave 1: 2 plans, Wave 2: 1 plan)
 
-    - [ ] Implement `MetricsCollectorService` (EventEmitter)
-    - [ ] Create async event queue with batch flushing logic
-    - [ ] Integrate with `ExtensionService` (capture messages/tasks)
-    - [ ] Integrate with `TelemetryService` (tool usage)
-    - [ ] Implement PII sanitization (hash paths, filter prompts)
-    - [ ] Add privacy configuration structure
+**Plan List:**
 
-- **Success Criteria:**
+- [ ] 02-01-PLAN.md — Build MetricsCollectorService with EventEmitter, types, PII sanitization, and privacy config
+- [ ] 02-02-PLAN.md — Implement EventQueue ring buffer to prevent memory leaks
+- [ ] 02-03-PLAN.md — Integrate with ExtensionService/TelemetryService and wire up session tracking
 
-    - Metrics flow from CLI actions to DB automatically
-    - Zero perceptible latency added to CLI commands
-    - PII (like usernames in paths) is hashed/scrubbed
-    - Queue flushes correctly on CLI shutdown
+**Success Criteria:**
 
-- **Key Files:**
+- Metrics flow from CLI actions to DB automatically
+- Zero perceptible latency added to CLI commands
+- PII (like usernames in paths) is hashed/scrubbed
+- Queue flushes correctly on CLI shutdown
 
-    - `cli/src/services/analytics/MetricsCollectorService.ts`
-    - `cli/src/services/analytics/types.ts`
-    - `cli/src/cli.ts` (integration points)
+**Key Files:**
 
-- **Risks:**
-    - Memory leaks from unbounded queue (Mitigation: Ring buffer/hard caps)
-    - Incomplete flush on exit
+- `cli/src/services/analytics/MetricsCollectorService.ts`
+- `cli/src/services/analytics/types.ts`
+- `cli/src/services/analytics/sanitization/PIISanitizer.ts`
+- `cli/src/services/analytics/queue/EventQueue.ts`
+- `cli/src/services/analytics/privacy/PrivacyConfig.ts`
+- `cli/src/cli.ts` (integration points)
+
+**Risks:**
+
+- Memory leaks from unbounded queue (Mitigation: Ring buffer with 1000-event cap)
+- Incomplete flush on exit (Mitigation: Graceful shutdown handlers)
 
 ---
 

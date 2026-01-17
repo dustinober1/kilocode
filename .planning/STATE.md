@@ -1,16 +1,17 @@
 # Project State
 
-**Current Phase:** 01 - Storage Foundation
-**Plan:** 2 of 2
-**Status:** Phase Complete
+**Current Phase:** 02 - Data Collection Layer
+**Plan:** Planning Complete
+**Status:** Ready for Execution
 
 ## Context
 
-Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Critical bugs fixed. Storage layer stable and ready for integration.
+Project initialized. Roadmap created. Phase 1 complete. Storage foundation with SQLite WAL mode established. Phase 2 planned: Metrics collection layer with EventEmitter architecture, PII sanitization, and CLI integration.
 
 ## Progress
 
 ███████████████████████████████████████ 100% (Phase 1 complete)
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0% (Phase 2 planned)
 
 ## Decisions Made
 
@@ -27,6 +28,17 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 - **Performance test accuracy:** Must measure flushEvents() not insertEvents() to verify actual DB write time (Plan 02)
 - **Deferred e2e verification:** End-to-end CLI restart test deferred to Phase 02 when StorageService integrates with CLI (Plan 02)
 
+### Phase 02: Data Collection Layer (Planned)
+
+- **Zero new dependencies:** Use native Node.js modules (events, crypto, process)
+- **EventEmitter architecture:** MetricsCollectorService extends EventEmitter for decoupled event capture
+- **Ring buffer queue:** 1000-event fixed capacity to prevent memory leaks
+- **SHA-256 PII hashing:** Use Node.js crypto module for username/path sanitization
+- **Graceful shutdown:** SIGTERM/SIGINT handlers with final flush before exit
+- **Type-safe events:** MetricsEvents interface for compile-time type checking
+- **Privacy-first:** DEFAULT_PRIVACY_CONFIG enables hashing and filtering by default
+- **Non-blocking emit:** Event queue decouples capture from storage (<5ms overhead)
+
 ### Earlier Decisions
 
 - See .planning/research/SUMMARY.md for initial architectural decisions
@@ -35,9 +47,9 @@ Project initialized. Roadmap created. Phase 1 complete. Storage foundation with 
 
 ### Active Blockers
 
-None - Phase 01 complete and stable.
+None - Phase 02 ready for execution.
 
-### Resolved (Plan 02)
+### Resolved (Phase 01)
 
 - **Test verification:** All tests pass on Node v20 LTS (user-approved)
 - **Build verification:** Native bindings build correctly (user-approved)
@@ -47,12 +59,12 @@ None - Phase 01 complete and stable.
 ### Concerns
 
 - **Node version compatibility:** Development on Node v25.2.1 is fine, but production should use Node v20 LTS for stable native bindings
-- **E2e verification deferred:** CLI restart persistence will be verified in Phase 02 during integration (this is expected, not a concern)
+- **E2e verification deferred:** CLI restart persistence will be verified in Phase 02 during integration
 
 ## Session Continuity
 
 **Last session:** 2025-01-17
-**Stopped at:** Completed Phase 01 Plan 02 (01-02-fix-critical-bugs.PLAN.md)
-**Resume file:** None (plan complete)
+**Stopped at:** Phase 02 planning complete
+**Resume file:** .planning/phases/02-data-collection-layer/02-01-PLAN.md
 
-**Ready for:** Phase 02 - Metrics Collection Layer
+**Ready for:** Execute Phase 02 plans (02-01, 02-02, 02-03)
