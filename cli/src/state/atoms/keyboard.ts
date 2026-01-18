@@ -2,7 +2,7 @@
  * Jotai atoms for centralized keyboard event state management
  */
 
-import { atom, Getter, Setter, type Getter as _Getter, type Setter as _Setter } from "jotai"
+import { atom, Getter, Setter, getDefaultStore, type Getter as _Getter, type Setter as _Setter } from "jotai"
 import type { Key, KeypressHandler } from "../../types/keyboard.js"
 import type { CommandSuggestion, ArgumentSuggestion, FileMentionSuggestion } from "../../services/autocomplete.js"
 import {
@@ -61,6 +61,7 @@ import {
 	navigateShellHistoryDownAtom,
 	executeShellCommandAtom,
 } from "./shell.js"
+import { showDashboardAtom } from "./analytics.js"
 import { saveClipboardImage, clipboardHasImage, cleanupOldClipboardImages } from "../../media/clipboard.js"
 import { logs } from "../../services/logs.js"
 
@@ -1039,6 +1040,32 @@ function handleGlobalHotkeys(get: Getter, set: Setter, key: Key): boolean {
 				return true
 			}
 			break
+		case "s":
+			// Ctrl+S: Toggle analytics dashboard
+			if (key.ctrl) {
+				const store = getDefaultStore()
+				const currentShowDashboard = store.get(showDashboardAtom)
+				store.set(showDashboardAtom, !currentShowDashboard)
+				return true
+			}
+			break
+		case "escape": {
+			// Escape: Exit dashboard view (if active)
+			const store = getDefaultStore()
+			const currentShowDashboard = store.get(showDashboardAtom)
+			if (currentShowDashboard) {
+				store.set(showDashboardAtom, false)
+				return true
+			}
+			// Continue to normal escape handling
+			const isStreaming = get(isStreamingAtom)
+			if (isStreaming) {
+				set(isCancellingAtom, true)
+				set(cancelTaskAtom)
+				return true
+			}
+			break
+		}
 		case "v":
 			// Ctrl+V or Cmd+V (macOS) - check for clipboard image
 			if (key.ctrl || key.meta) {
@@ -1060,15 +1087,6 @@ function handleGlobalHotkeys(get: Getter, set: Setter, key: Key): boolean {
 				}
 			}
 			break
-		case "escape": {
-			const isStreaming = get(isStreamingAtom)
-			if (isStreaming) {
-				set(isCancellingAtom, true)
-				set(cancelTaskAtom)
-				return true
-			}
-			break
-		}
 		case "r":
 			if (key.ctrl) {
 				const hasResumeTask = get(hasResumeTaskAtom)

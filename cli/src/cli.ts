@@ -37,6 +37,8 @@ import { getKiloToken } from "./config/persistence.js"
 import { SessionManager } from "../../src/shared/kilocode/cli-sessions/core/SessionManager.js"
 import { triggerExitConfirmationAtom } from "./state/atoms/keyboard.js"
 import { randomUUID } from "crypto"
+import MetricsCollectorService from "./services/analytics/MetricsCollectorService.js"
+import { initializeAnalyticsStateIntegration } from "./services/analytics/AnalyticsStateIntegration.js"
 
 /**
  * Main application class that orchestrates the CLI lifecycle
@@ -48,6 +50,8 @@ export class CLI {
 	private options: CLIOptions
 	private isInitialized = false
 	private sessionService: SessionManager | null = null
+	private sessionId: string | null = null
+	private metrics: MetricsCollectorService | null = null
 
 	constructor(options: CLIOptions = {}) {
 		this.options = options
@@ -83,6 +87,24 @@ export class CLI {
 			// Create Jotai store
 			this.store = createStore()
 			logs.debug("Jotai store created", "CLI")
+
+			// Initialize metrics collector and start session
+			this.metrics = MetricsCollectorService.getInstance()
+			this.sessionId = randomUUID()
+			await this.metrics.startSession(this.sessionId)
+			logs.debug("Metrics session started", "CLI", { sessionId: this.sessionId })
+
+			// Setup graceful shutdown handlers for metrics
+			this.setupShutdownHandlers()
+
+			// Initialize analytics state integration
+			// Bridges MetricsCollector events to Jotai atoms for real-time updates
+			try {
+				initializeAnalyticsStateIntegration()
+				logs.debug("Analytics state integration initialized", "CLI")
+			} catch (error) {
+				console.error("Failed to initialize analytics state integration:", error)
+			}
 
 			// Initialize telemetry service first to get identity
 			let config = await this.store.set(loadConfigAtom, this.options.mode)
@@ -416,6 +438,48 @@ export class CLI {
 		return updatedConfig
 	}
 
+	/**
+	 * Setup graceful shutdown handlers for process signals
+	 */
+	private setupShutdownHandlers(): void {
+		const shutdown = async (signal: string, exitCode: number) => {
+			console.log(`\nReceived ${signal}, shutting down...`)
+
+			// End metrics session with appropriate reason
+			if (this.metrics && this.sessionId) {
+				const exitReason = exitCode === 0 ? "user_exit" : "error"
+				try {
+					await this.metrics.endSession(this.sessionId, exitReason)
+					logs.debug("Metrics session ended on signal", "CLI", { signal, exitReason })
+				} catch (_error) {
+					// Ignore errors during shutdown
+				}
+			}
+
+			// Shutdown metrics collector (flushes events)
+			if (this.metrics) {
+				try {
+					await this.metrics.shutdown()
+					logs.debug("Metrics collector shut down on signal", "CLI")
+				} catch (_error) {
+					// Ignore errors during shutdown
+				}
+			}
+
+			process.exit(exitCode)
+		}
+
+		// Handle termination signals
+		process.on("SIGTERM", () => shutdown("SIGTERM", 0))
+		process.on("SIGINT", () => shutdown("SIGINT", 0))
+
+		// Handle uncaught exceptions
+		process.on("uncaughtException", async (error) => {
+			console.error("Uncaught exception:", error)
+			await shutdown("uncaughtException", 1)
+		})
+	}
+
 	private isDisposing = false
 
 	/**
@@ -498,6 +562,19 @@ export class CLI {
 			const telemetryService = getTelemetryService()
 			await telemetryService.shutdown()
 			logs.debug("Telemetry service shut down", "CLI")
+
+			// End metrics session and shutdown
+			if (this.metrics && this.sessionId) {
+				const exitReason = exitCode === 0 ? "completion" : "error"
+				await this.metrics.endSession(this.sessionId, exitReason)
+				logs.debug("Metrics session ended", "CLI", { sessionId: this.sessionId, exitReason })
+			}
+
+			// Shutdown metrics collector (flushes events)
+			if (this.metrics) {
+				await this.metrics.shutdown()
+				logs.debug("Metrics collector shut down", "CLI")
+			}
 
 			// Unmount UI
 			if (this.ui) {

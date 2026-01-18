@@ -5,6 +5,7 @@ import { logs } from "./logs.js"
 import { resolveExtensionPaths } from "../utils/extension-paths.js"
 import type { ExtensionMessage, WebviewMessage, ExtensionState, ModeConfig } from "../types/messages.js"
 import type { IdentityInfo } from "../host/VSCode.js"
+import MetricsCollectorService from "./analytics/MetricsCollectorService.js"
 
 /**
  * Configuration options for ExtensionService
@@ -83,9 +84,13 @@ export class ExtensionService extends EventEmitter {
 	private isInitialized = false
 	private isDisposed = false
 	private isActivated = false
+	private metrics: MetricsCollectorService
 
 	constructor(options: ExtensionServiceOptions = {}) {
 		super()
+
+		// Initialize metrics collector
+		this.metrics = MetricsCollectorService.getInstance()
 
 		// Resolve extension paths
 		const extensionPaths = resolveExtensionPaths()
@@ -144,6 +149,18 @@ export class ExtensionService extends EventEmitter {
 			(errorEvent: { context: string; error: Error; recoverable: boolean }) => {
 				const { context, error, recoverable } = errorEvent
 
+				// Emit metrics for error events (non-blocking)
+				try {
+					this.metrics.emit("error:occurred", {
+						error: error.message,
+						context: `ExtensionService:${context}`,
+						sessionId: this.metrics.getCurrentSessionId(),
+					})
+				} catch (_metricsError) {
+					// Don't let metrics errors break extension functionality
+					logs.debug("Failed to emit error metrics", "ExtensionService")
+				}
+
 				if (recoverable) {
 					logs.warn(`Recoverable extension error in ${context}`, "ExtensionService", { error })
 					// Emit warning event instead of error to prevent crashes
@@ -169,6 +186,18 @@ export class ExtensionService extends EventEmitter {
 
 			// Emit as event for direct consumption
 			this.emit("message", message)
+
+			// Emit metrics for message events (non-blocking)
+			try {
+				this.metrics.emit("extension:message", {
+					type: message.type,
+					hasError: message.type === "error",
+					sessionId: this.metrics.getCurrentSessionId(),
+				})
+			} catch (_error) {
+				// Don't let metrics errors break extension functionality
+				logs.debug("Failed to emit message metrics", "ExtensionService")
+			}
 
 			// Emit state change events for state messages
 			if (message.type === "state" && message.state) {

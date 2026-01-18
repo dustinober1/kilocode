@@ -19,6 +19,9 @@ import { getParallelModeParams } from "./parallel/parallel.js"
 import { DEBUG_MODES, DEBUG_FUNCTIONS } from "./debug/index.js"
 import { logs } from "./services/logs.js"
 import { validateAttachments, validateAttachRequiresAuto, accumulateAttachments } from "./validation/attachments.js"
+import { resolveExclusiveTextOrFile, resolveInitialPrompt } from "./utils/promptFiles.js"
+import { validateOnTaskCompletedPrompt } from "./pr/on-task-completed.js"
+import { tableCommand } from "./commands/table.js"
 
 // Log CLI location for debugging (visible in VS Code "Kilo-Code" output channel)
 logs.info(`CLI started from: ${import.meta.url}`)
@@ -53,7 +56,10 @@ program
 	.option("-f, --fork <shareId>", "Fork a session by ID")
 	.option("--nosplash", "Disable the welcome message and update notifications", false)
 	.option("--append-system-prompt <text>", "Append custom instructions to the system prompt")
+	.option("--append-system-prompt-file <path>", "Append custom instructions to the system prompt from a file")
 	.option("--on-task-completed <prompt>", "Send a custom prompt to the agent when the task completes")
+	.option("--on-task-completed-file <path>", "Send a custom prompt to the agent when the task completes from a file")
+	.option("--prompt-file <path>", "Read the initial prompt from a file")
 	.option(
 		"--attach <path>",
 		"Attach a file to the prompt (can be repeated). Currently supports images: png, jpg, jpeg, webp, gif, tiff",
@@ -65,7 +71,7 @@ program
 		// Subcommand names - if prompt matches one, Commander.js should handle it via subcommand
 		// This is a defensive check for cases where Commander.js routing might not work as expected
 		// (e.g., when spawned as a child process with stdin disconnected)
-		const SUBCOMMANDS = ["auth", "config", "debug", "models"]
+		const SUBCOMMANDS = ["auth", "config", "debug", "models", "table"]
 		if (SUBCOMMANDS.includes(prompt)) {
 			return
 		}
@@ -100,16 +106,13 @@ program
 			process.exit(1)
 		}
 
-		// Read from stdin if no prompt argument is provided and stdin is piped
-		let finalPrompt = prompt || ""
-		if (!finalPrompt && !process.stdin.isTTY) {
-			// Read from stdin
-			const chunks: Buffer[] = []
-			for await (const chunk of process.stdin) {
-				chunks.push(chunk)
-			}
-			finalPrompt = Buffer.concat(chunks).toString("utf-8").trim()
-		}
+		// Resolve initial prompt from arg, file, or stdin
+		const finalPrompt = await resolveInitialPrompt({
+			promptArg: prompt,
+			promptFilePath: options.promptFile,
+			auto: options.auto,
+			jsonIo: options.jsonIo,
+		})
 
 		// Validate that autonomous mode requires a prompt
 		if (options.auto && !finalPrompt) {
@@ -161,18 +164,6 @@ program
 			process.exit(1)
 		}
 
-		// Validate that --on-task-completed requires --auto
-		if (options.onTaskCompleted && !options.auto) {
-			console.error("Error: --on-task-completed option requires --auto flag to be enabled")
-			process.exit(1)
-		}
-
-		// Validate --on-task-completed prompt is not empty
-		if (options.onTaskCompleted !== undefined && options.onTaskCompleted.trim() === "") {
-			console.error("Error: --on-task-completed requires a non-empty prompt")
-			process.exit(1)
-		}
-
 		// Validate provider if specified
 		if (options.provider) {
 			// Load config to check if provider exists
@@ -200,6 +191,57 @@ program
 				for (const error of validationResult.errors) {
 					console.error(error)
 				}
+				process.exit(1)
+			}
+		}
+
+		// Resolve appendSystemPrompt from flag or file
+		let appendSystemPrompt: string | undefined
+		try {
+			appendSystemPrompt = await resolveExclusiveTextOrFile({
+				text: options.appendSystemPrompt,
+				filePath: options.appendSystemPromptFile,
+				textFlagName: "--append-system-prompt",
+				fileFlagName: "--append-system-prompt-file",
+			})
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error)
+			console.error(`Error: ${errorMessage}`)
+			process.exit(1)
+		}
+
+		// Resolve onTaskCompleted from flag or file
+		let onTaskCompleted: string | undefined
+		try {
+			onTaskCompleted = await resolveExclusiveTextOrFile({
+				text: options.onTaskCompleted,
+				filePath: options.onTaskCompletedFile,
+				textFlagName: "--on-task-completed",
+				fileFlagName: "--on-task-completed-file",
+			})
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error)
+			console.error(`Error: ${errorMessage}`)
+			process.exit(1)
+		}
+
+		// Validate that --on-task-completed requires --auto (applies to both flag and file variants)
+		if (onTaskCompleted !== undefined && !options.auto) {
+			console.error("Error: --on-task-completed option requires --auto flag to be enabled")
+			process.exit(1)
+		}
+
+		// Validate --on-task-completed prompt is not empty (applies to both flag and file variants)
+		if (onTaskCompleted !== undefined && onTaskCompleted.trim() === "") {
+			console.error("Error: --on-task-completed requires a non-empty prompt")
+			process.exit(1)
+		}
+
+		// Validate --on-task-completed prompt using the validation function (applies to both flag and file variants)
+		if (onTaskCompleted !== undefined) {
+			const validationResult = validateOnTaskCompletedPrompt(onTaskCompleted)
+			if (!validationResult.valid) {
+				console.error(`Error: ${validationResult.error}`)
 				process.exit(1)
 			}
 		}
@@ -285,9 +327,9 @@ program
 			session: options.session,
 			fork: options.fork,
 			noSplash: options.nosplash,
-			appendSystemPrompt: options.appendSystemPrompt,
+			...(appendSystemPrompt !== undefined && { appendSystemPrompt }),
 			attachments: attachments.length > 0 ? attachments : undefined,
-			onTaskCompleted: options.onTaskCompleted,
+			...(onTaskCompleted !== undefined && { onTaskCompleted }),
 		})
 		await cli.start()
 		await cli.dispose()
@@ -349,6 +391,9 @@ program
 		const { modelsApiCommand } = await import("./commands/models-api.js")
 		await modelsApiCommand(options)
 	})
+
+// Table command - display a sample ink-table
+program.addCommand(tableCommand)
 
 // Handle process termination signals
 process.on("SIGINT", async () => {

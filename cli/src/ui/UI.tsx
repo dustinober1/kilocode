@@ -7,6 +7,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Box, Text } from "ink"
 import { useAtomValue, useSetAtom } from "jotai"
 import { isStreamingAtom, errorAtom, addMessageAtom, messageResetCounterAtom, yoloModeAtom } from "../state/atoms/ui.js"
+import { showDashboardAtom } from "../state/atoms/analytics.js"
+import { AnalyticsDashboard } from "./analytics/AnalyticsDashboard.js"
 import { processImagePaths } from "../media/images.js"
 import { setCIModeAtom } from "../state/atoms/ci.js"
 import { configValidationAtom } from "../state/atoms/config.js"
@@ -69,6 +71,7 @@ export const UI: React.FC<UIAppProps> = ({ options, onExit }) => {
 	const taskResumedViaSession = useAtomValue(taskResumedViaContinueOrSessionAtom)
 	const { hasActiveTask } = useTaskState()
 	const exitRequestCounter = useAtomValue(exitRequestCounterAtom)
+	const showDashboard = useAtomValue(showDashboardAtom)
 
 	// Use specialized hooks for command and message handling
 	const { executeCommand, isExecuting: isExecutingCommand } = useCommandHandler()
@@ -345,21 +348,31 @@ export const UI: React.FC<UIAppProps> = ({ options, onExit }) => {
 	return (
 		// Using stdout.rows causes layout shift during renders
 		<Box key={resetCounter} flexDirection="column">
-			<Box flexDirection="column" overflow="hidden">
-				<MessageDisplay />
-			</Box>
-
-			{error && (
-				<Box borderStyle="round" borderColor={theme.semantic.error} paddingX={1} marginY={1}>
-					<Text color={theme.semantic.error}>⚠ {error}</Text>
+			{showDashboard ? (
+				// Show analytics dashboard when toggled
+				<Box flexGrow={1}>
+					<AnalyticsDashboard />
 				</Box>
-			)}
-
-			{!options.ci && configValidation.valid && (
+			) : (
+				// Show main UI when dashboard not active
 				<>
-					<StatusIndicator disabled={false} />
-					<CommandInput onSubmit={handleSubmit} disabled={isAnyOperationInProgress} />
-					<StatusBar />
+					<Box flexDirection="column" overflow="hidden">
+						<MessageDisplay />
+					</Box>
+
+					{error && (
+						<Box borderStyle="round" borderColor={theme.semantic.error} paddingX={1} marginY={1}>
+							<Text color={theme.semantic.error}>⚠ {error}</Text>
+						</Box>
+					)}
+
+					{!options.ci && configValidation.valid && (
+						<>
+							<StatusIndicator disabled={false} />
+							<CommandInput onSubmit={handleSubmit} disabled={isAnyOperationInProgress} />
+							<StatusBar />
+						</>
+					)}
 				</>
 			)}
 		</Box>

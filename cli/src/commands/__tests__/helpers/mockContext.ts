@@ -16,6 +16,7 @@
  */
 
 import { vi } from "vitest"
+import { createStore } from "jotai"
 import type { CommandContext } from "../../core/types.js"
 import type { CLIConfig } from "../../../config/types.js"
 
@@ -81,6 +82,8 @@ export function createMockContext(overrides: Partial<CommandContext> = {}): Comm
 		updateModelListFilters: vi.fn(),
 		changeModelListPage: vi.fn(),
 		resetModelListState: vi.fn(),
+		// Jotai store for atom access
+		uiStore: createStore(),
 	}
 
 	return {

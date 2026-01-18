@@ -9,6 +9,7 @@ import { TelemetryEvent } from "./events.js"
 import { logs } from "../logs.js"
 import type { CLIConfig } from "../../config/types.js"
 import { KILOCODE_POSTHOG_API_KEY } from "../../constants/telemetry.js"
+import MetricsCollectorService from "../analytics/MetricsCollectorService.js"
 
 /**
  * Telemetry Service
@@ -22,6 +23,7 @@ export class TelemetryService {
 	private currentMode = "code"
 	private currentCIMode = false
 	private currentWorkspace = ""
+	private metrics: MetricsCollectorService | null = null
 
 	private constructor() {
 		// Private constructor for singleton
@@ -55,6 +57,9 @@ export class TelemetryService {
 			this.currentMode = options.mode
 			this.currentCIMode = options.ciMode
 			this.currentWorkspace = options.workspace
+
+			// Initialize metrics collector
+			this.metrics = MetricsCollectorService.getInstance()
 
 			// Check if telemetry is enabled
 			if (!config.telemetry) {
@@ -174,6 +179,13 @@ export class TelemetryService {
 			initialWorkspace: this.anonymizeWorkspace(options.workspace),
 			hasPrompt: false, // Will be updated by CLI
 			hasTimeout: false,
+		})
+
+		// Emit to local metrics collector (non-blocking)
+		this.metrics?.emit("command:start", {
+			command: "kilo",
+			args: [],
+			sessionId: this.metrics?.getCurrentSessionId() || "",
 		})
 	}
 
@@ -385,6 +397,14 @@ export class TelemetryService {
 			success,
 			...metadata,
 		})
+
+		// Emit to local metrics collector (non-blocking)
+		this.metrics?.emit("tool:executed", {
+			toolName,
+			duration: executionTime,
+			success,
+			sessionId: this.metrics?.getCurrentSessionId() || "",
+		})
 	}
 
 	// ============================================================================
@@ -500,6 +520,19 @@ export class TelemetryService {
 		if (!this.client) return
 
 		this.client.trackApiRequest(provider, model, responseTime, tokens)
+
+		// Emit token usage metrics (non-blocking)
+		if (tokens) {
+			const promptTokens = (tokens.promptTokens as number) || 0
+			const completionTokens = (tokens.completionTokens as number) || 0
+
+			this.metrics?.emit("token:used", {
+				model,
+				promptTokens,
+				completionTokens,
+				sessionId: this.metrics?.getCurrentSessionId() || "",
+			})
+		}
 	}
 
 	public sendPerformanceMetrics(): void {
