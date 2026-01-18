@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import ReportGenerator, {
-	type SessionExport,
-	type MetricEventExport,
-	type AnalyticsExport,
-} from "../ReportGenerator"
+import ReportGenerator from "../ReportGenerator"
 
 // Mock StorageService
 const mockDb = {
@@ -107,7 +103,16 @@ describe("ReportGenerator", () => {
 			]
 
 			// First call returns session, second returns events
-			mockResult = mockSession
+			let callCount = 0
+			mockDb.then.mockImplementation(async (resolve) => {
+				callCount++
+				if (callCount === 1) {
+					return resolve(mockSession)
+				} else {
+					return resolve(mockEvents)
+				}
+			})
+
 			const result = await reportGenerator.generateSessionReport(sessionId)
 
 			expect(result).toEqual({
@@ -189,7 +194,7 @@ describe("ReportGenerator", () => {
 			mockResult = []
 
 			await expect(reportGenerator.generateSessionReport(sessionId)).rejects.toThrow(
-				`Session ${sessionId} not found`
+				`Session ${sessionId} not found`,
 			)
 		})
 
@@ -411,9 +416,9 @@ describe("ReportGenerator", () => {
 						events: [],
 					},
 					null,
-					2
+					2,
 				),
-				"utf-8"
+				"utf-8",
 			)
 		})
 
@@ -439,9 +444,9 @@ describe("ReportGenerator", () => {
 						sessions: [],
 					},
 					null,
-					2
+					2,
 				),
-				"utf-8"
+				"utf-8",
 			)
 		})
 
@@ -454,7 +459,7 @@ describe("ReportGenerator", () => {
 			vi.mocked(writeFile).mockRejectedValue(new Error("Permission denied"))
 
 			await expect(reportGenerator.exportToJsonFile(filePath)).rejects.toThrow(
-				"Failed to write export to /invalid/path/export.json"
+				"Failed to write export to /invalid/path/export.json",
 			)
 		})
 	})

@@ -103,7 +103,7 @@ class ReportGenerator {
 			throw new Error(`Session ${sessionId} not found`)
 		}
 
-		const sessionRow = sessionResult[0]
+		const sessionRow = sessionResult[0]!
 
 		// Query metric events for this session
 		const eventsResult = await this.db
@@ -203,9 +203,7 @@ class ReportGenerator {
 	 * Map a database metric event row to export format
 	 * @private
 	 */
-	private mapMetricEventToExport(
-		row: typeof schema.metricEvents.$inferSelect
-	): MetricEventExport {
+	private mapMetricEventToExport(row: typeof schema.metricEvents.$inferSelect): MetricEventExport {
 		// Parse metadata JSON, defaulting to empty object if null/invalid
 		let parsedMetadata: Record<string, unknown> = {}
 		if (row.metadata) {
