@@ -1,7 +1,7 @@
 # Project Roadmap: Session Analytics Dashboard
 
 **Project:** Session Analytics Dashboard
-**Status:** In Progress (Phases 1-4 Complete, Phase 5 Planned)
+**Status:** In Progress (Phases 1-4 Complete, Phase 5 In Progress)
 **Date:** 2026-01-17
 
 ## Overview
@@ -157,7 +157,7 @@ A local-first, privacy-focused analytics dashboard for the Kilo Code CLI. This f
 
 **Plan List:**
 
-- [ ] 05-01-PLAN.md — Build ReportGenerator service for JSON data export
+- [x] 05-01-PLAN.md — Build ReportGenerator service for JSON data export
 - [ ] 05-02-PLAN.md — Create /export command with file output
 - [ ] 05-03-PLAN.md — Create /privacy command and add /stats --history flag
 - [ ] 05-04-PLAN.md — Create performance and privacy audit documentation
