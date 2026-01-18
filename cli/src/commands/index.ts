@@ -23,6 +23,7 @@ import { checkpointCommand } from "./checkpoint.js"
 import { sessionCommand } from "./session.js"
 import { condenseCommand } from "./condense.js"
 import { statsCommand } from "./stats.js"
+import { exportCommand } from "./export.js"
 
 /**
  * Initialize all commands
@@ -45,4 +46,5 @@ export function initializeCommands(): void {
 	commandRegistry.register(sessionCommand)
 	commandRegistry.register(condenseCommand)
 	commandRegistry.register(statsCommand)
+	commandRegistry.register(exportCommand)
 }
