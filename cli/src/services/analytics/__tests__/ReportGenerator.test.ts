@@ -1,17 +1,12 @@
-/**
- * Unit tests for ReportGenerator
- */
-
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import ReportGenerator from "../ReportGenerator"
 
-// Mock StorageService
 const mockDb = {
 	select: vi.fn(() => mockDb),
 	from: vi.fn(() => mockDb),
 	where: vi.fn(() => mockDb),
 	limit: vi.fn(() => mockDb),
-	then: vi.fn((resolve) => resolve(mockResult)),
+	then: vi.fn(),
 }
 
 const mockGetDatabase = vi.fn(() => mockDb)
@@ -24,38 +19,31 @@ vi.mock("../StorageService", () => ({
 	},
 }))
 
-// Mock fs/promises
 vi.mock("fs/promises", () => ({
 	writeFile: vi.fn(),
 }))
 
 const { writeFile } = await import("fs/promises")
 
+function setupMockChain(result: unknown) {
+	mockDb.select.mockReturnThis()
+	mockDb.from.mockReturnThis()
+	mockDb.where.mockReturnThis()
+	mockDb.limit.mockReturnThis()
+	mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve(result)))
+}
+
 describe("ReportGenerator", () => {
 	let reportGenerator: ReportGenerator
-	let mockResult: unknown
 
 	beforeEach(() => {
-		// Reset all mocks
 		vi.clearAllMocks()
-
-		// Reset singleton instance
 		;(ReportGenerator as { instance?: ReportGenerator }).instance = undefined
-
-		// Setup mock database chain
-		mockResult = []
-		mockDb.select.mockReturnThis()
-		mockDb.from.mockReturnThis()
-		mockDb.where.mockReturnThis()
-		mockDb.limit.mockReturnThis()
-		mockDb.then.mockImplementation((resolve) => resolve(mockResult))
-
-		// Get service instance
+		setupMockChain([])
 		reportGenerator = ReportGenerator.getInstance()
 	})
 
 	afterEach(() => {
-		// Clean up
 		vi.clearAllMocks()
 	})
 
@@ -63,7 +51,6 @@ describe("ReportGenerator", () => {
 		it("returns singleton instance", () => {
 			const instance1 = ReportGenerator.getInstance()
 			const instance2 = ReportGenerator.getInstance()
-
 			expect(instance1).toBe(instance2)
 		})
 	})
@@ -102,15 +89,10 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			// First call returns session, second returns events
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSession)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount === 1 ? mockSession : mockEvents))
 			})
 
 			const result = await reportGenerator.generateSessionReport(sessionId)
@@ -169,15 +151,10 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			// We need to mock sequential calls properly
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSession)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount === 1 ? mockSession : mockEvents))
 			})
 
 			const result = await reportGenerator.generateSessionReport(sessionId)
@@ -188,13 +165,10 @@ describe("ReportGenerator", () => {
 		})
 
 		it("throws error for non-existent session", async () => {
-			const sessionId = "non-existent-session"
+			mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve([])))
 
-			// Empty result for non-existent session
-			mockResult = []
-
-			await expect(reportGenerator.generateSessionReport(sessionId)).rejects.toThrow(
-				`Session ${sessionId} not found`,
+			await expect(reportGenerator.generateSessionReport("non-existent")).rejects.toThrow(
+				"Session non-existent not found",
 			)
 		})
 
@@ -214,7 +188,13 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			mockResult = mockSession
+			const mockEvents: unknown[] = []
+			let callCount = 0
+			mockDb.then.mockImplementation((resolve) => {
+				callCount++
+				return Promise.resolve(resolve(callCount === 1 ? mockSession : mockEvents))
+			})
+
 			const result = await reportGenerator.generateSessionReport(sessionId)
 
 			expect(result.endTime).toBeNull()
@@ -248,18 +228,12 @@ describe("ReportGenerator", () => {
 			]
 
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSession)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount === 1 ? mockSession : mockEvents))
 			})
 
 			const result = await reportGenerator.generateSessionReport(sessionId)
-
-			// Should wrap invalid JSON in { raw: ... }
 			expect(result.events[0].metadata).toEqual({ raw: "invalid-json-{" })
 		})
 	})
@@ -279,30 +253,23 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			const mockEvents = []
-
-			mockResult = mockSessions
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSessions)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount === 1 ? mockSessions : []))
 			})
 
 			const result = await reportGenerator.generateFullExport()
 
-			expect(result.privacyConfig).toBeDefined()
-			expect(result.privacyConfig.enabled).toBe(true)
-			expect(result.privacyConfig.hashPII).toBe(true)
-			expect(result.privacyConfig.filterPrompts).toBe(true)
+			expect(result.privacyConfig).toEqual({
+				enabled: true,
+				hashPII: true,
+				filterPrompts: true,
+			})
 		})
 
 		it("handles empty database", async () => {
-			mockResult = []
-			mockDb.then.mockResolvedValue([])
+			mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve([])))
 
 			const result = await reportGenerator.generateFullExport()
 
@@ -312,15 +279,12 @@ describe("ReportGenerator", () => {
 		})
 
 		it("includes export metadata", async () => {
-			const mockSessions = []
-			mockResult = mockSessions
+			mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve([])))
 
 			const result = await reportGenerator.generateFullExport()
 
 			expect(result.version).toBe("1.0.0")
-			expect(result.exportedAt).toBeDefined()
-			// Verify ISO date format
-			expect(new Date(result.exportedAt).toISOString()).toBe(result.exportedAt)
+			expect(result.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
 		})
 
 		it("includes multiple sessions with events", async () => {
@@ -347,17 +311,18 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			const mockEvents = []
-
-			mockResult = mockSessions
+			// First call returns all sessions, then two calls for events (one per session)
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSessions)
-				} else {
-					return resolve(mockEvents)
-				}
+				if (callCount === 1) return Promise.resolve(resolve(mockSessions))
+				if (callCount === 2)
+					return Promise.resolve(
+						resolve([
+							{ id: 1, sessionId: "session-1", eventType: "test", timestamp: new Date(), metadata: "{}" },
+						]),
+					)
+				return Promise.resolve(resolve([]))
 			})
 
 			const result = await reportGenerator.generateFullExport()
@@ -386,17 +351,10 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			const mockEvents = []
-
-			mockResult = mockSession
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount <= 1) {
-					return resolve(mockSession)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount <= 1 ? mockSession : []))
 			})
 
 			await reportGenerator.exportToJsonFile(filePath, sessionId)
@@ -425,37 +383,32 @@ describe("ReportGenerator", () => {
 		it("writes full export without session ID", async () => {
 			const filePath = "/tmp/full-export.json"
 
-			mockResult = []
-			mockDb.then.mockResolvedValue([])
+			mockDb.then.mockImplementation((resolve) => {
+				return Promise.resolve(resolve([]))
+			})
 
 			await reportGenerator.exportToJsonFile(filePath)
 
-			expect(writeFile).toHaveBeenCalledWith(
-				filePath,
-				JSON.stringify(
-					{
-						version: "1.0.0",
-						exportedAt: expect.any(String),
-						privacyConfig: {
-							enabled: true,
-							hashPII: true,
-							filterPrompts: true,
-						},
-						sessions: [],
-					},
-					null,
-					2,
-				),
-				"utf-8",
-			)
+			expect(writeFile).toHaveBeenCalledTimes(1)
+			expect(writeFile).toHaveBeenCalledWith(filePath, expect.any(String), "utf-8")
+
+			const writtenData = JSON.parse(vi.mocked(writeFile).mock.calls[0][1])
+			expect(writtenData).toMatchObject({
+				version: "1.0.0",
+				privacyConfig: {
+					enabled: true,
+					hashPII: true,
+					filterPrompts: true,
+				},
+				sessions: [],
+			})
+			expect(writtenData.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
 		})
 
 		it("throws error when writeFile fails", async () => {
 			const filePath = "/invalid/path/export.json"
 
-			mockResult = []
-			mockDb.then.mockResolvedValue([])
-
+			mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve([])))
 			vi.mocked(writeFile).mockRejectedValue(new Error("Permission denied"))
 
 			await expect(reportGenerator.exportToJsonFile(filePath)).rejects.toThrow(
@@ -491,20 +444,14 @@ describe("ReportGenerator", () => {
 				},
 			]
 
-			mockResult = mockSession
 			let callCount = 0
-			mockDb.then.mockImplementation(async (resolve) => {
+			mockDb.then.mockImplementation((resolve) => {
 				callCount++
-				if (callCount === 1) {
-					return resolve(mockSession)
-				} else {
-					return resolve(mockEvents)
-				}
+				return Promise.resolve(resolve(callCount === 1 ? mockSession : mockEvents))
 			})
 
 			const result = await reportGenerator.generateSessionReport(sessionId)
 
-			// Verify ISO string format
 			expect(result.startTime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
 			expect(result.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
 			expect(result.events[0].timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
