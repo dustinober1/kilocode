@@ -1,12 +1,39 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import ReportGenerator from "../ReportGenerator"
 
+// Create a mock `then` function that the tests can override
+// Default implementation returns currentMockResult
+let currentMockResult: unknown = []
+
+const thenMock = vi.fn((resolve: (value: unknown) => unknown) => {
+	return Promise.resolve(resolve(currentMockResult))
+})
+
+// Create a query result promise that uses thenMock and has chain methods
+function createQueryResult() {
+	// Create a Promise that will be resolved by calling thenMock
+	let promise = new Promise<unknown>((resolve) => {
+		// Call thenMock with our resolve function
+		thenMock((value: unknown) => {
+			resolve(value)
+			return value
+		})
+	}) as Promise<unknown> & { where: ReturnType<typeof vi.fn>; limit: ReturnType<typeof vi.fn>; then: typeof thenMock }
+
+	// Attach chain methods synchronously (before the Promise resolves)
+	promise.where = vi.fn(() => promise)
+	promise.limit = vi.fn(() => promise)
+	promise.then = thenMock
+
+	return promise
+}
+
 const mockDb = {
-	select: vi.fn(() => mockDb),
-	from: vi.fn(() => mockDb),
-	where: vi.fn(() => mockDb),
-	limit: vi.fn(() => mockDb),
-	then: vi.fn(),
+	then: thenMock, // For direct mockDb.then.mockImplementation() calls
+	select: vi.fn(() => ({ from: vi.fn(() => createQueryResult()) })),
+	from: vi.fn(() => createQueryResult()),
+	where: vi.fn(() => createQueryResult()),
+	limit: vi.fn(() => createQueryResult()),
 }
 
 const mockGetDatabase = vi.fn(() => mockDb)
@@ -26,11 +53,7 @@ vi.mock("fs/promises", () => ({
 const { writeFile } = await import("fs/promises")
 
 function setupMockChain(result: unknown) {
-	mockDb.select.mockReturnThis()
-	mockDb.from.mockReturnThis()
-	mockDb.where.mockReturnThis()
-	mockDb.limit.mockReturnThis()
-	mockDb.then.mockImplementation((resolve) => Promise.resolve(resolve(result)))
+	currentMockResult = result
 }
 
 describe("ReportGenerator", () => {
